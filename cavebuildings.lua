@@ -12,7 +12,7 @@ local function register_cave_central(params)
     minetest.register_decoration({
         name = "lualore:" .. params.name,
         deco_type = "schematic",
-        place_on = {"everness:crystal_case_dirt_with_moss","default:stone","default:dry_dirt_with_dry_grass","default:dry_dirt"},
+        place_on = {"everness:crystal_case_dirt_with_moss","caverealms:stone_with_moss","caverealms:stone_with_lichen","everness:crystal_cave_dirt_with_moss","everness:dirt_with_crystal_grass","everness:dirt_with_cursed_grass","everness:soul_sandstone_veined"},
         sidelen = 58,                          -- bigger grid for rare buildings
         noise_params = central_noise,
         biomes = {"cave","everness:forsaken_cave"},
