@@ -277,7 +277,7 @@ function lualore.wizard_magic.gold_levitate(self, target)
 
 	-- Apply negative gravity to float up
 	target:set_physics_override({
-		gravity = -0.5
+		gravity = -0.1
 	})
 
 	-- Visual effect
