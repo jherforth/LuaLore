@@ -269,8 +269,8 @@ function lualore.wizard_magic.white_hyper_curse(self, target)
 
 	-- Apply hyper speed
 	target:set_physics_override({
-		speed = (old_physics.speed or 1) * 3,
-		jump = (old_physics.jump or 1) * 2
+		speed = (old_physics.speed or 1) * 5,
+		jump = (old_physics.jump or 1) * 4
 	})
 
 	-- Visual effect with star particles
@@ -443,7 +443,7 @@ function lualore.wizard_magic.gold_transform(self, target)
 	})
 
 	-- Shrink field of view (wider to reduce claustrophobia)
-	target:set_fov(1.5, false, 0.8)
+	target:set_fov(0.8, false, 0.8)
 
 	-- Visual effect with downward arrow particles
 	local spawner_id = minetest.add_particlespawner({
