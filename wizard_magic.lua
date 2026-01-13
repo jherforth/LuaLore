@@ -364,6 +364,23 @@ function lualore.wizard_magic.gold_levitate(self, target)
 end
 
 -- Spell 2: Shrinking Curse (yellow particles, shrink player for 15 seconds)
+--
+-- FIELD OF VIEW (FOV) ADJUSTMENT GUIDE:
+-- The FOV parameter controls how "zoomed in" or "zoomed out" the player's view is when shrunken.
+-- Values work as multipliers of the default FOV (typically 72 degrees in Minetest):
+--
+-- - FOV = 1.0: Normal view (72 degrees) - feels like regular gameplay
+-- - FOV = 1.2: Slightly wider view (~86 degrees) - subtle zoom out
+-- - FOV = 1.5: Moderately wider view (~108 degrees) - noticeable zoom out (CURRENT SETTING)
+-- - FOV = 1.8: Wide view (~130 degrees) - significant zoom out, good peripheral vision
+-- - FOV = 2.0: Very wide view (~144 degrees) - fish-eye effect starts to appear
+-- - FOV = 0.8: Narrower view (~58 degrees) - zoomed in, claustrophobic
+-- - FOV = 0.5: Very narrow view (~36 degrees) - extreme tunnel vision
+--
+-- TESTING TIP: Change the value at line ~437 (search for "target:set_fov") to test different values.
+-- Higher values = wider view angle = less claustrophobic when small
+-- Lower values = narrower view angle = more claustrophobic and tunnel-vision-like
+--
 function lualore.wizard_magic.gold_transform(self, target)
 	if not self or not self.object or not target or not target:is_player() then return false end
 
@@ -394,30 +411,39 @@ function lualore.wizard_magic.gold_transform(self, target)
 		player_effects[player_name] = {}
 	end
 
-	-- Store old values
+	-- Store old values (only if not already stored to prevent compounding)
 	local old_physics = target:get_physics_override()
 	local old_visual_size = target:get_properties().visual_size
 	local old_fov = target:get_fov()
 
 	player_effects[player_name].shrunken = true
 	player_effects[player_name].shrink_timer = 10
-	player_effects[player_name].old_shrink_physics = old_physics
-	player_effects[player_name].old_visual_size = old_visual_size
-	player_effects[player_name].old_fov = old_fov
 
-	-- Shrink player model to half size
+	-- Only store original values if not already stored (prevents compounding if check fails)
+	if not player_effects[player_name].old_shrink_physics then
+		player_effects[player_name].old_shrink_physics = old_physics
+	end
+	if not player_effects[player_name].old_visual_size then
+		player_effects[player_name].old_visual_size = old_visual_size
+	end
+	if not player_effects[player_name].old_fov then
+		player_effects[player_name].old_fov = old_fov
+	end
+
+	-- Shrink player model to half size (use base visual size to prevent compounding)
+	local base_visual_size = player_effects[player_name].old_visual_size
 	target:set_properties({
-		visual_size = {x = old_visual_size.x * 0.5, y = old_visual_size.y * 0.5}
+		visual_size = {x = base_visual_size.x * 0.5, y = base_visual_size.y * 0.5}
 	})
 
-	-- Slow player down
+	-- Slow player down (use absolute values, not relative, to prevent compounding)
 	target:set_physics_override({
 		speed = 0.5,
 		jump = 0.7
 	})
 
-	-- Shrink field of view (50% more open than before: 0.8 -> 1.2)
-	target:set_fov(1.2, false, 0.8)
+	-- Shrink field of view (wider to reduce claustrophobia)
+	target:set_fov(1.5, false, 0.8)
 
 	-- Visual effect with downward arrow particles
 	local spawner_id = minetest.add_particlespawner({
@@ -629,17 +655,19 @@ minetest.register_globalstep(function(dtime)
 			local pos = player:get_pos()
 
 			if effects.levitate_timer > 0 then
-				-- Still rising
+				-- Still rising (gravity is already set to -0.1 from initial cast)
 				effects.levitate_height = effects.levitate_height + 0.5
 			elseif effects.levitate_timer > -3 then
-				-- Drop phase (3 seconds)
-				if effects.levitate_timer == 0 or (effects.levitate_timer < 0 and effects.levitate_timer > -0.1) then
-					-- Switch to normal gravity to fall
+				-- Drop phase (3 seconds) - ensure we've switched to falling
+				if not effects.levitate_falling then
+					-- First time entering drop phase - switch to normal gravity
 					player:set_physics_override({gravity = 1})
+					effects.levitate_falling = true
 				end
 			else
-				-- Effect over
+				-- Effect over - restore original physics
 				effects.levitate = nil
+				effects.levitate_falling = nil
 				if effects.old_physics then
 					player:set_physics_override(effects.old_physics)
 					effects.old_physics = nil
@@ -731,7 +759,7 @@ function lualore.wizard_magic.wizard_attack(self, dtime, wizard_type)
 
 	-- Initialize attack cooldown (faster than melee)
 	if not self.nv_wizard_attack_cooldown then
-		self.nv_wizard_attack_cooldown = 2.5
+		self.nv_wizard_attack_cooldown = 4
 	end
 
 	self.nv_wizard_attack_timer = self.nv_wizard_attack_timer + dtime
