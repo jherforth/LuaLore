@@ -286,7 +286,7 @@ function lualore.wizard_magic.gold_levitate(self, target)
 	return true
 end
 
--- Spell 2: Transformation Curse (yellow particles, turn into opossum for 15 seconds)
+-- Spell 2: Shrinking Curse (yellow particles, shrink player for 15 seconds)
 function lualore.wizard_magic.gold_transform(self, target)
 	if not self or not self.object or not target or not target:is_player() then return false end
 
@@ -297,13 +297,7 @@ function lualore.wizard_magic.gold_transform(self, target)
 	local player_name = target:get_player_name()
 
 	-- Check if player already has this effect
-	if player_effects[player_name] and player_effects[player_name].transformed then
-		return false
-	end
-
-	-- Check if animalia mod exists
-	if not minetest.get_modpath("animalia") then
-		-- Fallback: just slow the player down
+	if player_effects[player_name] and player_effects[player_name].shrunken then
 		return false
 	end
 
@@ -322,20 +316,30 @@ function lualore.wizard_magic.gold_transform(self, target)
 		player_effects[player_name] = {}
 	end
 
-	player_effects[player_name].transformed = true
-	player_effects[player_name].transform_timer = 15
-	player_effects[player_name].old_model = {
-		mesh = target:get_properties().mesh,
-		textures = target:get_properties().textures,
-		visual_size = target:get_properties().visual_size
-	}
+	-- Store old values
+	local old_physics = target:get_physics_override()
+	local old_visual_size = target:get_properties().visual_size
+	local old_fov = target:get_fov()
 
-	-- Transform to opossum
+	player_effects[player_name].shrunken = true
+	player_effects[player_name].shrink_timer = 15
+	player_effects[player_name].old_shrink_physics = old_physics
+	player_effects[player_name].old_visual_size = old_visual_size
+	player_effects[player_name].old_fov = old_fov
+
+	-- Shrink player model to half size
 	target:set_properties({
-		mesh = "animalia_opossum.b3d",
-		textures = {"animalia_opossum.png"},
-		visual_size = {x = 0.5, y = 0.5}
+		visual_size = {x = old_visual_size.x * 0.5, y = old_visual_size.y * 0.5}
 	})
+
+	-- Slow player down
+	target:set_physics_override({
+		speed = 0.5,
+		jump = 0.7
+	})
+
+	-- Shrink field of view
+	target:set_fov(0.5, false, 0.5)
 
 	-- Visual effect
 	spawn_spiral_particles(target_pos, "yellow", 2, 1.5)
@@ -379,27 +383,31 @@ function lualore.wizard_magic.black_blindness(self, target)
 
 	player_effects[player_name].blinded = true
 	player_effects[player_name].blind_timer = 10
+	player_effects[player_name].blind_particles = {}
 
-	-- Create heavy black particle cloud around player's view
-	local eye_pos = vector.add(target_pos, {x=0, y=1.5, z=0})
-	minetest.add_particlespawner({
-		amount = 200,
-		time = 10,
-		minpos = {x = eye_pos.x - 0.3, y = eye_pos.y - 0.3, z = eye_pos.z - 0.3},
-		maxpos = {x = eye_pos.x + 0.3, y = eye_pos.y + 0.3, z = eye_pos.z + 0.3},
-		minvel = {x = -0.1, y = -0.1, z = -0.1},
-		maxvel = {x = 0.1, y = 0.1, z = 0.1},
-		minacc = {x = 0, y = 0, z = 0},
-		maxacc = {x = 0, y = 0, z = 0},
-		minexptime = 1,
-		maxexptime = 2,
-		minsize = 8,
-		maxsize = 15,
-		collisiondetection = false,
-		attached = target,
-		texture = "default_cloud.png^[colorize:black:255",
-		glow = 0,
-	})
+	-- Create a dense cloud of large black particles that stays attached to player view
+	-- We'll create multiple particle spawners for full coverage
+	for i = 1, 5 do
+		local spawner_id = minetest.add_particlespawner({
+			amount = 100,
+			time = 0,  -- Infinite spawner
+			minpos = {x = -0.1, y = -0.1, z = 0.1},
+			maxpos = {x = 0.1, y = 0.1, z = 0.3},
+			minvel = {x = 0, y = 0, z = 0},
+			maxvel = {x = 0, y = 0, z = 0},
+			minacc = {x = 0, y = 0, z = 0},
+			maxacc = {x = 0, y = 0, z = 0},
+			minexptime = 0.5,
+			maxexptime = 1.0,
+			minsize = 20,
+			maxsize = 30,
+			collisiondetection = false,
+			attached = target,
+			texture = "default_cloud.png^[colorize:black:255",
+			glow = 0,
+		})
+		table.insert(player_effects[player_name].blind_particles, spawner_id)
+	end
 
 	return true
 end
@@ -531,33 +539,51 @@ minetest.register_globalstep(function(dtime)
 			end
 		end
 
-		-- Transformation
-		if effects.transformed then
-			effects.transform_timer = effects.transform_timer - 0.1
+		-- Shrinking
+		if effects.shrunken then
+			effects.shrink_timer = effects.shrink_timer - 0.1
 
-			if effects.transform_timer <= 0 then
-				effects.transformed = nil
-				-- Restore original model
-				if effects.old_model then
+			if effects.shrink_timer <= 0 then
+				effects.shrunken = nil
+
+				-- Restore original visual size
+				if effects.old_visual_size then
 					player:set_properties({
-						mesh = effects.old_model.mesh,
-						textures = effects.old_model.textures,
-						visual_size = effects.old_model.visual_size
+						visual_size = effects.old_visual_size
 					})
-					effects.old_model = nil
+					effects.old_visual_size = nil
 				end
 
-				-- Transformation end particles
+				-- Restore original physics
+				if effects.old_shrink_physics then
+					player:set_physics_override(effects.old_shrink_physics)
+					effects.old_shrink_physics = nil
+				end
+
+				-- Restore original FOV
+				if effects.old_fov then
+					player:set_fov(effects.old_fov, false, 0.5)
+					effects.old_fov = nil
+				end
+
+				-- Shrink end particles
 				local pos = player:get_pos()
 				spawn_spiral_particles(pos, "yellow", 1, 1.5)
 			end
 		end
 
-		-- Blindness (just countdown, particles are attached)
+		-- Blindness (countdown and clean up particles)
 		if effects.blinded then
 			effects.blind_timer = effects.blind_timer - 0.1
 			if effects.blind_timer <= 0 then
 				effects.blinded = nil
+				-- Remove particle spawners
+				if effects.blind_particles then
+					for _, spawner_id in ipairs(effects.blind_particles) do
+						minetest.delete_particlespawner(spawner_id)
+					end
+					effects.blind_particles = nil
+				end
 			end
 		end
 

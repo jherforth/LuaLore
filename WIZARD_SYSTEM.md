@@ -54,11 +54,12 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 - Blue spiral particles during levitation
 - Cooldown: 2.5 seconds
 
-**Spell 2: Transformation Curse** (Yellow Particles) *Requires Animalia mod*
-- Transforms player into an opossum model for 15 seconds
+**Spell 2: Shrinking Curse** (Yellow Particles)
+- Shrinks player model to half size for 15 seconds
+- Reduces player speed to 50% and jump height to 70%
+- Shrinks field of view to 50% (tunnel vision effect)
 - Yellow spiral particles during transformation
-- Player retains movement but with smaller size
-- If Animalia mod is not installed, this spell will not work
+- Makes player harder to control and vulnerable
 - Cooldown: 2.5 seconds
 
 **Drops:**
@@ -70,9 +71,10 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 **Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 3 (wizards rarely use melee)
 
 **Spell: Blindness** (Black Particles)
-- Creates thick black particles blocking player's vision for 10 seconds
-- Particles are attached to player's view
-- Makes it extremely difficult to see
+- Creates a dense cloud of large black particles that fully obscure vision for 10 seconds
+- Particles stay attached to player's field of view
+- Multiple particle spawners ensure complete visual coverage
+- Makes it extremely difficult to see anything
 - Does not cause damage
 - Cooldown: 2.5 seconds
 
@@ -137,7 +139,7 @@ Examples:
 **Gold Wizard:**
 - Watch for blue particles and prepare for fall damage
 - Stay near walls or low ceilings to prevent high levitation
-- Don't panic if transformed - you can still fight
+- If shrunken, retreat to safety - reduced speed and FOV make you vulnerable
 
 **Black Wizard:**
 - Use sound cues when blinded
@@ -175,15 +177,14 @@ Spells use cloud particles with color modifiers:
 - Green: Sick curse
 - White: Hyper speed
 - Blue: Levitation
-- Yellow: Transformation
-- Black: Blindness
+- Yellow: Shrinking curse
+- Black: Blindness (multiple continuous spawners for full vision coverage)
 
 ### Spell Cooldowns
 All spells have a 2.5-second cooldown, making wizards aggressive spell casters who constantly pressure players with magic attacks.
 
 ## Dependencies
 - `mobs_redo` (required for mob system)
-- `animalia` (optional - required for Gold Wizard's transformation spell)
 - `default` (for particle textures and item drops)
 
 ## Notes
