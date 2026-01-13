@@ -203,30 +203,62 @@ end
 local function spawn_wizard_boss_group(center_pos)
 	-- Spawn all 4 wizards around the center in a circle
 	local wizards = {"redWizard", "whiteWizard", "goldWizard", "blackWizard"}
-	local radius = 8
+	local radius = 6
 	local spawned_count = 0
 
 	for i, wizard_name in ipairs(wizards) do
 		local angle = (i / #wizards) * math.pi * 2
 		local spawn_pos = {
 			x = center_pos.x + math.cos(angle) * radius,
-			y = center_pos.y + 1,
+			y = center_pos.y,
 			z = center_pos.z + math.sin(angle) * radius
 		}
 
-		-- Try to find solid ground nearby
-		local ground_pos = minetest.find_node_near(spawn_pos, 5, {"group:stone", "default:obsidian", "group:cracky"})
-		if ground_pos then
-			ground_pos.y = ground_pos.y + 1
-			local obj = minetest.add_entity(ground_pos, "lualore:" .. wizard_name)
+		-- Try to find a valid spawn position
+		local valid_pos = nil
+
+		-- First, try the exact calculated position
+		local node = minetest.get_node(spawn_pos)
+		local node_above = minetest.get_node({x=spawn_pos.x, y=spawn_pos.y+1, z=spawn_pos.z})
+		local node_below = minetest.get_node({x=spawn_pos.x, y=spawn_pos.y-1, z=spawn_pos.z})
+
+		-- Check if we have air to spawn in and solid ground below
+		if (node.name == "air" or node.name == "ignore") and
+		   (node_above.name == "air" or node_above.name == "ignore") and
+		   (node_below.name ~= "air" and node_below.name ~= "ignore") then
+			valid_pos = spawn_pos
+		else
+			-- Try to find a better position nearby
+			for dy = -2, 5 do
+				local test_pos = {x=spawn_pos.x, y=spawn_pos.y+dy, z=spawn_pos.z}
+				local test_node = minetest.get_node(test_pos)
+				local test_above = minetest.get_node({x=test_pos.x, y=test_pos.y+1, z=test_pos.z})
+				local test_below = minetest.get_node({x=test_pos.x, y=test_pos.y-1, z=test_pos.z})
+
+				if (test_node.name == "air" or test_node.name == "ignore") and
+				   (test_above.name == "air" or test_above.name == "ignore") and
+				   (test_below.name ~= "air" and test_below.name ~= "ignore") then
+					valid_pos = test_pos
+					break
+				end
+			end
+		end
+
+		-- Spawn the wizard
+		if valid_pos then
+			local obj = minetest.add_entity(valid_pos, "lualore:" .. wizard_name)
 			if obj then
 				spawned_count = spawned_count + 1
-				minetest.log("action", "[lualore] Spawned " .. wizard_name .. " at " .. minetest.pos_to_string(ground_pos))
+				minetest.log("action", "[lualore] Spawned " .. wizard_name .. " at " .. minetest.pos_to_string(valid_pos))
+			else
+				minetest.log("warning", "[lualore] Failed to spawn " .. wizard_name .. " - entity creation failed")
 			end
+		else
+			minetest.log("warning", "[lualore] Failed to spawn " .. wizard_name .. " - no valid position found")
 		end
 	end
 
-	return spawned_count == 4
+	return spawned_count >= 3
 end
 
 -- Spawn wizards when cave castle is generated
@@ -254,18 +286,55 @@ end)
 minetest.register_chatcommand("spawn_wizards", {
 	params = "",
 	description = "Spawn the wizard boss group near you",
-	privs = {server = true},
+	privs = {give = true},
 	func = function(name, param)
 		local player = minetest.get_player_by_name(name)
 		if not player then return false, "Player not found" end
 
 		local pos = player:get_pos()
+
+		-- Log attempt
+		minetest.log("action", "[lualore] " .. name .. " attempting to spawn wizard boss group at " .. minetest.pos_to_string(pos))
+
 		local success = spawn_wizard_boss_group(pos)
 
 		if success then
-			return true, "Wizard boss group spawned!"
+			return true, "Wizard boss group spawned! (At least 3 wizards)"
 		else
-			return false, "Failed to spawn wizard boss group"
+			return false, "Failed to spawn wizard boss group - check debug.txt for details"
+		end
+	end,
+})
+
+-- Alternative simpler command that spawns individual wizards
+minetest.register_chatcommand("spawn_wizard", {
+	params = "<wizard_type>",
+	description = "Spawn a single wizard (red, white, gold, or black)",
+	privs = {give = true},
+	func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		if not player then return false, "Player not found" end
+
+		local wizard_map = {
+			red = "redWizard",
+			white = "whiteWizard",
+			gold = "goldWizard",
+			black = "blackWizard"
+		}
+
+		local wizard_name = wizard_map[param:lower()]
+		if not wizard_name then
+			return false, "Invalid wizard type. Use: red, white, gold, or black"
+		end
+
+		local pos = player:get_pos()
+		pos.y = pos.y + 1
+
+		local obj = minetest.add_entity(pos, "lualore:" .. wizard_name)
+		if obj then
+			return true, wizard_name .. " spawned!"
+		else
+			return false, "Failed to spawn " .. wizard_name
 		end
 	end,
 })

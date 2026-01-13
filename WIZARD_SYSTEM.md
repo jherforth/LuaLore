@@ -91,11 +91,23 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 - Wizards are positioned in a circle around the castle center
 
 ### Manual Spawning (Testing)
-Server administrators can spawn wizard groups using:
+Players with "give" privilege can spawn wizards using these commands:
+
+**Spawn entire boss group:**
 ```
 /spawn_wizards
 ```
-This requires server privileges and spawns all 4 wizards near the player.
+Spawns all 4 wizards around you in a circle (requires at least 3 to succeed)
+
+**Spawn individual wizard:**
+```
+/spawn_wizard <type>
+```
+Where `<type>` is: red, white, gold, or black
+
+Examples:
+- `/spawn_wizard red` - Spawns Red Wizard
+- `/spawn_wizard black` - Spawns Black Wizard
 
 ## Combat Strategy
 
