@@ -101,39 +101,55 @@ local function is_valid_cave_floor(pos, data, area)
     if pos.x - castle_width/2 < minp.x or pos.x + castle_width/2 > maxp.x or
        pos.z - castle_width/2 < minp.z or pos.z + castle_width/2 > maxp.z or
        floor_y < minp.y or pos.y + castle_height > maxp.y then
-        return false
+        return false, "out_of_bounds"
     end
 
     -- Wrap in pcall to catch any indexing errors
     local success, result = pcall(function()
-        -- Check for solid floor below (sample multiple points)
+        -- Check for solid floor below (sample multiple points, but allow some gaps)
+        local floor_checks = 0
+        local floor_solid = 0
         for x = pos.x - castle_width/2, pos.x + castle_width/2, 3 do
             for z = pos.z - castle_width/2, pos.z + castle_width/2, 3 do
+                floor_checks = floor_checks + 1
                 local idx = area:index(math.floor(x), floor_y, math.floor(z))
-                if not is_floor_node(data[idx]) then
-                    return false
+                if is_floor_node(data[idx]) then
+                    floor_solid = floor_solid + 1
                 end
             end
         end
 
-        -- Check for air above (castle needs vertical space)
+        -- Require at least 70% solid floor (more lenient)
+        if floor_solid / floor_checks < 0.7 then
+            return false, "insufficient_floor"
+        end
+
+        -- Check for air above (castle needs vertical space, but allow some obstacles)
+        local air_checks = 0
+        local air_found = 0
         for y = pos.y, pos.y + castle_height do
-            for x = pos.x - 8, pos.x + 8, 3 do
-                for z = pos.z - 8, pos.z + 8, 3 do
+            for x = pos.x - 8, pos.x + 8, 4 do  -- Slightly wider spacing
+                for z = pos.z - 8, pos.z + 8, 4 do
+                    air_checks = air_checks + 1
                     local idx = area:index(math.floor(x), y, math.floor(z))
-                    if data[idx] ~= c_air then
-                        return false
+                    if data[idx] == c_air then
+                        air_found = air_found + 1
                     end
                 end
             end
         end
 
-        return true
+        -- Require at least 80% air space (more lenient)
+        if air_found / air_checks < 0.8 then
+            return false, "insufficient_air"
+        end
+
+        return true, "valid"
     end)
 
     if not success then
         minetest.log("warning", "[Lualore] Error in is_valid_cave_floor: " .. tostring(result))
-        return false
+        return false, "error"
     end
 
     return result
@@ -147,9 +163,9 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
             return
         end
 
-        -- Rare chance per chunk
+        -- Rare chance per chunk (increased for better distribution)
         local pr = PcgRandom(blockseed + 8492)
-        if pr:next(1, 500) ~= 1 then  -- 1 in 500 chance per chunk (for testing)
+        if pr:next(1, 100) ~= 1 then  -- 1 in 100 chance per chunk
             return
         end
 
@@ -169,7 +185,8 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
         -- Try to find a valid position in this chunk (stay well within original chunk bounds)
         local attempts = 0
         local margin = 15
-        while attempts < 10 do
+        local max_attempts = 30
+        while attempts < max_attempts do
             attempts = attempts + 1
 
             local test_pos = {
@@ -179,7 +196,8 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
             }
 
             -- Check if position has valid floor
-            if is_valid_cave_floor(test_pos, data, area) then
+            local valid, reason = is_valid_cave_floor(test_pos, data, area)
+            if valid then
                 -- Check if far enough from other castles
                 if is_far_from_castles(test_pos) then
                     -- Schedule castle placement (must be done after mapgen completes)
@@ -197,7 +215,7 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
                         if success then
                             table.insert(castle_positions, test_pos)
                             save_castle_positions()
-                            minetest.log("action", "[Lualore] Cave castle spawned at " ..
+                            minetest.log("action", "[Lualore] ✓ Cave castle spawned at " ..
                                 minetest.pos_to_string(test_pos))
                         else
                             minetest.log("warning", "[Lualore] Failed to place castle schematic at " ..
@@ -206,9 +224,13 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
                     end)
                     return
                 else
-                    minetest.log("action", "[Lualore] Valid floor found but too close to existing castle at " ..
-                        minetest.pos_to_string(test_pos))
+                    minetest.log("action", "[Lualore] Valid floor found but too close to existing castle (attempt " ..
+                        attempts .. "/" .. max_attempts .. ")")
                 end
+            elseif attempts % 5 == 0 then
+                -- Log every 5th rejection to avoid spam
+                minetest.log("action", "[Lualore] Location rejected: " .. reason ..
+                    " (attempt " .. attempts .. "/" .. max_attempts .. ")")
             end
         end
 
