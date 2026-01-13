@@ -126,7 +126,7 @@ function lualore.wizard_magic.red_invert_controls(self, target)
 	local red_sound = math.random(1, 2)
 	minetest.sound_play("Red" .. red_sound, {
 		pos = caster_pos,
-		gain = 0.15,
+		gain = 0.08,
 		max_hear_distance = 32
 	}, true)
 
