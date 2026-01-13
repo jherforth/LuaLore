@@ -66,6 +66,7 @@ dofile(modpath .. "/witch_magic.lua")
 dofile(modpath .. "/wizard_magic.lua")
 dofile(modpath .. "/villagers.lua")
 dofile(modpath .. "/house_spawning.lua")
+dofile(modpath .. "/village_commands.lua")
 dofile(modpath .. "/cave_wizards.lua")
 
 -- 6. Optional/fun extras
