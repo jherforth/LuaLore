@@ -13,9 +13,9 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 - No damage, purely positional disruption
 - Cooldown: 2.5 seconds
 
-**Spell 2: Inverted Controls** (Red Particles)
+**Spell 2: Inverted Controls** (Red X-Shaped Particles)
 - Reverses player movement controls for 5 seconds
-- Red spiral particles around the player
+- Red X-shaped particles around the player
 - Does not cause damage
 - Cooldown: 2.5 seconds
 
@@ -26,17 +26,18 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 ### White Wizard
 **Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 3 (wizards rarely use melee)
 
-**Spell 1: Sick Curse** (Green Particles)
+**Spell 1: Sick Curse** (Green Organic Blob Particles)
 - Lasts 15 seconds
 - Randomly freezes player movement for 1 second (every 3-5 seconds)
-- Green particle bursts when frozen
+- Green organic blob-shaped particle bursts when frozen
 - Causes small damage over time
 - Cooldown: 2.5 seconds
 
-**Spell 2: Hyper Curse** (White Particles)
+**Spell 2: Hyper Curse** (White Star Particles)
 - Lasts 15 seconds
 - Increases player speed by 200%
 - Increases jump height
+- White star-shaped particles around the player
 - Makes controls harder to manage
 - Cooldown: 2.5 seconds
 
@@ -47,18 +48,19 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 ### Gold Wizard
 **Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 3 (wizards rarely use melee)
 
-**Spell 1: Levitate** (Blue Particles)
+**Spell 1: Levitate** (Blue Up Arrow Particles)
 - Causes player to float upward for 3 seconds
 - Reaches up to 10 nodes high
 - Player then drops, taking fall damage
-- Blue spiral particles during levitation
+- Blue upward arrow particles rising around the player
 - Cooldown: 2.5 seconds
 
-**Spell 2: Shrinking Curse** (Yellow Particles)
+**Spell 2: Shrinking Curse** (Yellow Down Arrow Particles)
 - Shrinks player model to half size for 15 seconds
 - Reduces player speed to 50% and jump height to 70%
 - Shrinks field of view to 50% (tunnel vision effect)
-- Yellow spiral particles during transformation
+- Yellow downward arrow particles when shrinking
+- Yellow upward arrow particles when returning to normal size
 - Makes player harder to control and vulnerable
 - Cooldown: 2.5 seconds
 
@@ -70,8 +72,8 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 ### Black Wizard
 **Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 3 (wizards rarely use melee)
 
-**Spell: Blindness** (Black Particles)
-- Creates swirling black particles that obscure vision for 10 seconds
+**Spell: Blindness** (Black Circle Particles)
+- Creates swirling black circle particles that obscure vision for 10 seconds
 - Particles zoom around the player's field of view making it hard to see
 - Multiple particle layers create a chaotic visual effect
 - Vision is heavily obscured but not completely blocked
@@ -171,14 +173,22 @@ Examples:
 All spell effects are tracked in a global `player_effects` table that updates every 0.1 seconds via globalstep. Effects automatically clean up when expired.
 
 ### Particle System
-Spells use cloud particles with color modifiers:
-- Purple: Teleport
-- Red: Control inversion
-- Green: Sick curse
-- White: Hyper speed
-- Blue: Levitation
-- Yellow: Shrinking curse
-- Black: Blindness (swirling particles with velocity that obscure but don't block vision)
+Spells use custom-shaped particles with color modifiers:
+- Purple: Teleport (cloud particles)
+- Red: Control inversion (X-shaped particles)
+- Green: Sick curse (organic blob particles)
+- White: Hyper speed (star-shaped particles)
+- Blue: Levitation (upward arrow particles)
+- Yellow: Shrinking curse (downward arrow particles when shrinking, upward when returning to normal)
+- Black: Blindness (circle particles that swirl with velocity to obscure but not block vision)
+
+Custom particle textures:
+- `lualore_particle_x.png` - X shape for inverted controls
+- `lualore_particle_blob.png` - Organic blob for sickness
+- `lualore_particle_star.png` - Star for hyper speed
+- `lualore_particle_arrow_up.png` - Upward arrow for levitation
+- `lualore_particle_arrow_down.png` - Downward arrow for shrinking
+- `lualore_particle_circle.png` - Circle for blindness
 
 ### Spell Cooldowns
 All spells have a 2.5-second cooldown, making wizards aggressive spell casters who constantly pressure players with magic attacks.

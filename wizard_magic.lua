@@ -1,6 +1,15 @@
 -- wizard_magic.lua
 -- Magic system for cave wizards boss fight
 -- Four wizards with unique spell attacks
+--
+-- PARTICLE SHAPES:
+-- Each spell uses a unique particle shape to make effects visually distinct:
+-- - Red Wizard (Inverted Controls): X-shaped particles (lualore_particle_x.png)
+-- - White Wizard (Sick Curse): Organic blob particles (lualore_particle_blob.png)
+-- - White Wizard (Hyper Speed): Star particles (lualore_particle_star.png)
+-- - Gold Wizard (Levitate): Upward arrow particles (lualore_particle_arrow_up.png)
+-- - Gold Wizard (Shrinking): Downward arrow particles (lualore_particle_arrow_down.png)
+-- - Black Wizard (Blindness): Circle particles (lualore_particle_circle.png)
 
 local S = minetest.get_translator("lualore")
 
@@ -131,8 +140,24 @@ function lualore.wizard_magic.red_invert_controls(self, target)
 	player_effects[player_name].inverted_controls = true
 	player_effects[player_name].inverted_timer = 5
 
-	-- Visual effect
-	spawn_spiral_particles(target_pos, "red", 5, 1)
+	-- Visual effect with X-shaped particles
+	local spawner_id = minetest.add_particlespawner({
+		amount = 30,
+		time = 5,
+		minpos = {x = target_pos.x - 1, y = target_pos.y, z = target_pos.z - 1},
+		maxpos = {x = target_pos.x + 1, y = target_pos.y + 2, z = target_pos.z + 1},
+		minvel = {x = -0.5, y = 0.5, z = -0.5},
+		maxvel = {x = 0.5, y = 1.5, z = 0.5},
+		minacc = {x = 0, y = 0, z = 0},
+		maxacc = {x = 0, y = 0.3, z = 0},
+		minexptime = 1,
+		maxexptime = 2,
+		minsize = 2,
+		maxsize = 4,
+		collisiondetection = false,
+		texture = "lualore_particle_x.png^[colorize:red:180",  -- X shape for inverted controls
+		glow = 12,
+	})
 
 	-- Apply inverted movement (make player move backwards when going forward)
 	local old_physics = target:get_physics_override()
@@ -179,8 +204,24 @@ function lualore.wizard_magic.white_sick_curse(self, target)
 	player_effects[player_name].sick_timer = 15
 	player_effects[player_name].sick_freeze_timer = 0
 
-	-- Visual effect
-	spawn_spiral_particles(target_pos, "green", 15, 1)
+	-- Visual effect with organic blob particles
+	local spawner_id = minetest.add_particlespawner({
+		amount = 40,
+		time = 15,
+		minpos = {x = target_pos.x - 1, y = target_pos.y, z = target_pos.z - 1},
+		maxpos = {x = target_pos.x + 1, y = target_pos.y + 2, z = target_pos.z + 1},
+		minvel = {x = -0.8, y = 0.3, z = -0.8},
+		maxvel = {x = 0.8, y = 1.2, z = 0.8},
+		minacc = {x = 0, y = -0.2, z = 0},
+		maxacc = {x = 0, y = 0.1, z = 0},
+		minexptime = 1.5,
+		maxexptime = 3,
+		minsize = 1.5,
+		maxsize = 4.5,  -- Varied sizes for organic feel
+		collisiondetection = false,
+		texture = "lualore_particle_blob.png^[colorize:green:180",  -- Organic blob for sickness
+		glow = 12,
+	})
 
 	-- Initial damage
 	target:set_hp(target:get_hp() - 2)
@@ -229,8 +270,24 @@ function lualore.wizard_magic.white_hyper_curse(self, target)
 		jump = (old_physics.jump or 1) * 2
 	})
 
-	-- Visual effect
-	spawn_spiral_particles(target_pos, "white", 15, 1)
+	-- Visual effect with star particles
+	local spawner_id = minetest.add_particlespawner({
+		amount = 35,
+		time = 15,
+		minpos = {x = target_pos.x - 1, y = target_pos.y, z = target_pos.z - 1},
+		maxpos = {x = target_pos.x + 1, y = target_pos.y + 2, z = target_pos.z + 1},
+		minvel = {x = -1.5, y = 0.5, z = -1.5},
+		maxvel = {x = 1.5, y = 2, z = 1.5},
+		minacc = {x = 0, y = 0, z = 0},
+		maxacc = {x = 0, y = 0.5, z = 0},
+		minexptime = 0.8,
+		maxexptime = 1.5,
+		minsize = 2,
+		maxsize = 4,
+		collisiondetection = false,
+		texture = "lualore_particle_star.png^[colorize:white:150",  -- Star shape for hyper speed
+		glow = 14,
+	})
 
 	return true
 end
@@ -280,8 +337,24 @@ function lualore.wizard_magic.gold_levitate(self, target)
 		gravity = -0.1
 	})
 
-	-- Visual effect
-	spawn_spiral_particles(target_pos, "blue", 6, 1)
+	-- Visual effect with upward arrow particles
+	local spawner_id = minetest.add_particlespawner({
+		amount = 40,
+		time = 6,
+		minpos = {x = target_pos.x - 0.8, y = target_pos.y, z = target_pos.z - 0.8},
+		maxpos = {x = target_pos.x + 0.8, y = target_pos.y + 0.5, z = target_pos.z + 0.8},
+		minvel = {x = -0.2, y = 2, z = -0.2},  -- Mostly upward velocity
+		maxvel = {x = 0.2, y = 3.5, z = 0.2},
+		minacc = {x = 0, y = 0.5, z = 0},
+		maxacc = {x = 0, y = 1, z = 0},
+		minexptime = 1,
+		maxexptime = 2,
+		minsize = 2.5,
+		maxsize = 4,
+		collisiondetection = false,
+		texture = "lualore_particle_arrow_up.png^[colorize:blue:180",  -- Up arrow for levitation
+		glow = 12,
+	})
 
 	return true
 end
@@ -341,8 +414,24 @@ function lualore.wizard_magic.gold_transform(self, target)
 	-- Shrink field of view
 	target:set_fov(0.8, false, 0.8)
 
-	-- Visual effect
-	spawn_spiral_particles(target_pos, "yellow", 2, 1.5)
+	-- Visual effect with downward arrow particles
+	local spawner_id = minetest.add_particlespawner({
+		amount = 35,
+		time = 2,
+		minpos = {x = target_pos.x - 1, y = target_pos.y + 1, z = target_pos.z - 1},
+		maxpos = {x = target_pos.x + 1, y = target_pos.y + 2, z = target_pos.z + 1},
+		minvel = {x = -0.3, y = -2, z = -0.3},  -- Mostly downward velocity
+		maxvel = {x = 0.3, y = -0.8, z = 0.3},
+		minacc = {x = 0, y = -0.5, z = 0},
+		maxacc = {x = 0, y = -1, z = 0},
+		minexptime = 1,
+		maxexptime = 2,
+		minsize = 2.5,
+		maxsize = 4.5,
+		collisiondetection = false,
+		texture = "lualore_particle_arrow_down.png^[colorize:yellow:180",  -- Down arrow for shrinking
+		glow = 12,
+	})
 
 	return true
 end
@@ -408,7 +497,7 @@ function lualore.wizard_magic.black_blindness(self, target)
 			maxsize = 18,  -- Maximum particle size (increase for more coverage)
 			collisiondetection = false,
 			attached = target,  -- Particles follow player
-			texture = "default_cloud.png^[colorize:black:255",  -- Black cloud texture
+			texture = "lualore_particle_circle.png^[colorize:black:255",  -- Black circle for blindness
 			glow = 0,  -- No glow
 		})
 		table.insert(player_effects[player_name].blind_particles, spawner_id)
@@ -490,7 +579,7 @@ minetest.register_globalstep(function(dtime)
 						minsize = 0.5,
 						maxsize = 1.5,
 						collisiondetection = false,
-						texture = "default_cloud.png^[colorize:green:200",
+						texture = "lualore_particle_blob.png^[colorize:green:200",  -- Green organic blobs for sickness
 						glow = 12,
 					})
 
@@ -571,9 +660,25 @@ minetest.register_globalstep(function(dtime)
 					effects.old_fov = nil
 				end
 
-				-- Shrink end particles
+				-- Shrink end particles (return to normal size)
 				local pos = player:get_pos()
-				spawn_spiral_particles(pos, "yellow", 1, 1.5)
+				minetest.add_particlespawner({
+					amount = 30,
+					time = 1,
+					minpos = {x = pos.x - 0.8, y = pos.y, z = pos.z - 0.8},
+					maxpos = {x = pos.x + 0.8, y = pos.y + 1, z = pos.z + 0.8},
+					minvel = {x = -0.5, y = 1, z = -0.5},
+					maxvel = {x = 0.5, y = 2.5, z = 0.5},
+					minacc = {x = 0, y = 0.5, z = 0},
+					maxacc = {x = 0, y = 1, z = 0},
+					minexptime = 0.8,
+					maxexptime = 1.5,
+					minsize = 2,
+					maxsize = 3.5,
+					collisiondetection = false,
+					texture = "lualore_particle_arrow_up.png^[colorize:yellow:180",  -- Up arrows for growing back
+					glow = 12,
+				})
 			end
 		end
 
