@@ -119,40 +119,66 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 
             minetest.log("action", "[Lualore] Found new cave castle at " .. statue_key)
 
-            -- Spawn 4 wizards (one of each color)
-            local spawn_attempts = 0
+            -- Predefined spawn positions around the statue (relative offsets)
+            -- These cover a good area around the castle center
+            local spawn_positions = {
+                {x = -8, y = 0, z = -8},
+                {x = 8, y = 0, z = -8},
+                {x = -8, y = 0, z = 8},
+                {x = 8, y = 0, z = 8},
+                {x = -12, y = 0, z = 0},
+                {x = 12, y = 0, z = 0},
+                {x = 0, y = 0, z = -12},
+                {x = 0, y = 0, z = 12},
+                {x = -6, y = 1, z = -6},
+                {x = 6, y = 1, z = -6},
+                {x = -6, y = 1, z = 6},
+                {x = 6, y = 1, z = 6},
+                {x = 0, y = 1, z = 0},
+                {x = -10, y = -1, z = -10},
+                {x = 10, y = -1, z = -10},
+                {x = -10, y = -1, z = 10},
+                {x = 10, y = -1, z = 10},
+            }
+
             local wizards_spawned = 0
+            local position_index = 1
 
-            while wizards_spawned < 4 and spawn_attempts < 50 do
-                spawn_attempts = spawn_attempts + 1
-
-                -- Random position near the statue
-                local offset = {
-                    x = math.random(-15, 15),
-                    y = math.random(-5, 5),
-                    z = math.random(-15, 15)
-                }
+            -- Try to spawn all 4 wizards
+            while wizards_spawned < 4 and position_index <= #spawn_positions do
+                local offset = spawn_positions[position_index]
+                position_index = position_index + 1
 
                 local spawn_pos = vector.add(statue_pos, offset)
                 local node_below = minetest.get_node({x = spawn_pos.x, y = spawn_pos.y - 1, z = spawn_pos.z})
                 local node_at = minetest.get_node(spawn_pos)
+                local node_above = minetest.get_node({x = spawn_pos.x, y = spawn_pos.y + 1, z = spawn_pos.z})
 
-                -- Check if it's a valid spawn spot (solid below, air at position)
-                if node_below.name ~= "air" and node_at.name == "air" then
+                -- Check if it's a valid spawn spot (solid below, air at position and above)
+                if node_below.name ~= "air" and
+                   node_at.name == "air" and
+                   node_above.name == "air" then
+
                     local color = wizard_colors[wizards_spawned + 1]
-
                     local wizard = minetest.add_entity(spawn_pos, "lualore:" .. color .. "wizard")
+
                     if wizard then
                         wizards_spawned = wizards_spawned + 1
-                        minetest.log("action", "[Lualore] Spawned " .. color .. " wizard at cave castle")
+                        minetest.log("action", "[Lualore] Spawned " .. color .. " wizard at " ..
+                                     minetest.pos_to_string(spawn_pos))
                     end
                 end
             end
 
-            if wizards_spawned > 0 then
-                spawned_statues[statue_key] = true
-                save_statues()
-                minetest.log("action", "[Lualore] Cave castle complete: " .. wizards_spawned .. "/4 wizards spawned")
+            -- Always mark as processed even if not all wizards spawned
+            spawned_statues[statue_key] = true
+            save_statues()
+
+            if wizards_spawned == 4 then
+                minetest.log("action", "[Lualore] Cave castle complete: All 4 wizards spawned!")
+            else
+                minetest.log("warning", "[Lualore] Cave castle: Only " .. wizards_spawned ..
+                             "/4 wizards spawned (may need manual spawning)")
             end
 
             ::continue::
@@ -235,6 +261,87 @@ minetest.register_chatcommand("find_castle", {
         else
             return false, "No castles found within " .. radius .. " nodes"
         end
+    end,
+})
+
+-- Manually spawn wizards at the nearest castle
+minetest.register_chatcommand("spawn_castle_wizards", {
+    params = "[radius]",
+    description = "Spawn/respawn 4 wizards at nearest castle (default radius: 50)",
+    privs = {server = true},
+    func = function(name, param)
+        local player = minetest.get_player_by_name(name)
+        if not player then
+            return false, "Player not found"
+        end
+
+        local pos = player:get_pos()
+        local radius = tonumber(param) or 50
+
+        -- Find nearest statue
+        local statues = minetest.find_nodes_in_area(
+            {x = pos.x - radius, y = pos.y - radius, z = pos.z - radius},
+            {x = pos.x + radius, y = pos.y + radius, z = pos.z + radius},
+            {"caverealms:dm_statue"}
+        )
+
+        if #statues == 0 then
+            return false, "No castle found within " .. radius .. " nodes"
+        end
+
+        -- Use nearest statue
+        local statue_pos = statues[1]
+        local min_dist = vector.distance(pos, statue_pos)
+        for _, spos in ipairs(statues) do
+            local dist = vector.distance(pos, spos)
+            if dist < min_dist then
+                min_dist = dist
+                statue_pos = spos
+            end
+        end
+
+        -- Spawn positions
+        local spawn_positions = {
+            {x = -8, y = 0, z = -8},
+            {x = 8, y = 0, z = -8},
+            {x = -8, y = 0, z = 8},
+            {x = 8, y = 0, z = 8},
+            {x = -12, y = 0, z = 0},
+            {x = 12, y = 0, z = 0},
+            {x = 0, y = 0, z = -12},
+            {x = 0, y = 0, z = 12},
+            {x = -6, y = 1, z = -6},
+            {x = 6, y = 1, z = -6},
+            {x = -6, y = 1, z = 6},
+            {x = 6, y = 1, z = 6},
+        }
+
+        local wizards_spawned = 0
+        local position_index = 1
+
+        while wizards_spawned < 4 and position_index <= #spawn_positions do
+            local offset = spawn_positions[position_index]
+            position_index = position_index + 1
+
+            local spawn_pos = vector.add(statue_pos, offset)
+            local node_below = minetest.get_node({x = spawn_pos.x, y = spawn_pos.y - 1, z = spawn_pos.z})
+            local node_at = minetest.get_node(spawn_pos)
+            local node_above = minetest.get_node({x = spawn_pos.x, y = spawn_pos.y + 1, z = spawn_pos.z})
+
+            if node_below.name ~= "air" and
+               node_at.name == "air" and
+               node_above.name == "air" then
+
+                local color = wizard_colors[wizards_spawned + 1]
+                local wizard = minetest.add_entity(spawn_pos, "lualore:" .. color .. "wizard")
+                if wizard then
+                    wizards_spawned = wizards_spawned + 1
+                end
+            end
+        end
+
+        return true, "Spawned " .. wizards_spawned .. "/4 wizards at castle " ..
+                     minetest.pos_to_string(statue_pos)
     end,
 })
 
