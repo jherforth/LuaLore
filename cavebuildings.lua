@@ -12,14 +12,7 @@ if not minetest.registered_nodes["caverealms:dm_statue"] then
         groups = {cracky = 1, level = 2},
         sounds = default.node_sound_stone_defaults(),
         light_source = 5,
-        drop = {
-            max_items = 3,
-            items = {
-                {items = {"default:diamond 5"}, rarity = 1},
-                {items = {"default:mese_crystal 7"}, rarity = 1},
-                {items = {"default:obsidian 3"}, rarity = 1},
-            }
-        }
+        drop = "caverealms:dm_statue"  -- Drops itself as the prize
     })
 end
 
