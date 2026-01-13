@@ -39,7 +39,7 @@ minetest.register_decoration({
     noise_params = cave_castle_noise,
     y_min = -8000,
     y_max = -20,
-    place_offset_y = 0,
+    place_offset_y = -8,
     flags = "place_center_x, place_center_z, force_placement, all_floors",
     schematic = minetest.get_modpath("lualore") .. "/schematics/cavecastle.mts",
     rotation = "random",
