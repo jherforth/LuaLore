@@ -204,7 +204,7 @@ function lualore.wizard_magic.white_sick_curse(self, target)
 
 	player_effects[player_name].sick_curse = true
 	player_effects[player_name].sick_timer = 15
-	player_effects[player_name].sick_freeze_timer = 0
+	player_effects[player_name].sick_freeze_timer = 1
 
 	-- Visual effect with organic blob particles
 	local spawner_id = minetest.add_particlespawner({
@@ -226,7 +226,7 @@ function lualore.wizard_magic.white_sick_curse(self, target)
 	})
 
 	-- Initial damage
-	target:set_hp(target:get_hp() - 2)
+	target:set_hp(target:get_hp() - 4)
 
 	return true
 end
