@@ -789,6 +789,138 @@ minetest.register_globalstep(function(dtime)
 end)
 
 --------------------------------------------------------------------
+-- WIZARD DEFENSIVE ABILITIES (Self-Use Powers)
+--------------------------------------------------------------------
+
+-- Red Wizard: Self-Teleport (defensive evasion)
+function lualore.wizard_magic.red_self_teleport(self)
+	if not self or not self.object then return false end
+
+	local pos = self.object:get_pos()
+	if not pos then return false end
+
+	-- Find a random position within 5 nodes
+	local attempts = 0
+	local new_pos = nil
+
+	while attempts < 10 do
+		local offset = {
+			x = math.random(-5, 5),
+			y = math.random(-2, 2),
+			z = math.random(-5, 5)
+		}
+
+		local test_pos = vector.add(pos, offset)
+
+		-- Check if the position is valid (not in solid node)
+		local node = minetest.get_node(test_pos)
+		local node_above = minetest.get_node(vector.add(test_pos, {x=0, y=1, z=0}))
+
+		if node and node.name and minetest.registered_nodes[node.name] and
+		   node_above and node_above.name and minetest.registered_nodes[node_above.name] then
+
+			local def = minetest.registered_nodes[node.name]
+			local def_above = minetest.registered_nodes[node_above.name]
+
+			-- Check if both positions are walkable (for standing) or not solid (for teleporting into)
+			if not def.walkable and not def_above.walkable then
+				new_pos = test_pos
+				break
+			end
+		end
+
+		attempts = attempts + 1
+	end
+
+	if not new_pos then return false end
+
+	-- Purple particle burst at original position
+	minetest.add_particlespawner({
+		amount = 50,
+		time = 0.5,
+		minpos = {x = pos.x - 0.5, y = pos.y, z = pos.z - 0.5},
+		maxpos = {x = pos.x + 0.5, y = pos.y + 2, z = pos.z + 0.5},
+		minvel = {x = -2, y = 0, z = -2},
+		maxvel = {x = 2, y = 3, z = 2},
+		minacc = {x = 0, y = -1, z = 0},
+		maxacc = {x = 0, y = -2, z = 0},
+		minexptime = 0.8,
+		maxexptime = 1.5,
+		minsize = 2,
+		maxsize = 4,
+		collisiondetection = false,
+		texture = "lualore_particle_circle.png^[colorize:purple:200",
+		glow = 14,
+	})
+
+	-- Teleport
+	self.object:set_pos(new_pos)
+
+	-- Purple particle burst at new position
+	minetest.add_particlespawner({
+		amount = 50,
+		time = 0.5,
+		minpos = {x = new_pos.x - 0.5, y = new_pos.y, z = new_pos.z - 0.5},
+		maxpos = {x = new_pos.x + 0.5, y = new_pos.y + 2, z = new_pos.z + 0.5},
+		minvel = {x = -2, y = 0, z = -2},
+		maxvel = {x = 2, y = 3, z = 2},
+		minacc = {x = 0, y = -1, z = 0},
+		maxacc = {x = 0, y = -2, z = 0},
+		minexptime = 0.8,
+		maxexptime = 1.5,
+		minsize = 2,
+		maxsize = 4,
+		collisiondetection = false,
+		texture = "lualore_particle_circle.png^[colorize:purple:200",
+		glow = 14,
+	})
+
+	return true
+end
+
+-- Gold Wizard: Self-Levitate (defensive evasion)
+function lualore.wizard_magic.gold_self_levitate(self)
+	if not self or not self.object then return false end
+
+	local pos = self.object:get_pos()
+	if not pos then return false end
+
+	-- Store the levitation state
+	if not self.nv_levitating then
+		self.nv_levitating = true
+		self.nv_levitate_timer = 0
+		self.nv_levitate_start_y = pos.y
+
+		-- Apply upward velocity
+		local vel = self.object:get_velocity()
+		self.object:set_velocity({x = vel.x, y = 8, z = vel.z})
+
+		-- Golden particle burst
+		minetest.add_particlespawner({
+			amount = 40,
+			time = 0.5,
+			minpos = {x = pos.x - 0.5, y = pos.y, z = pos.z - 0.5},
+			maxpos = {x = pos.x + 0.5, y = pos.y + 1, z = pos.z + 0.5},
+			minvel = {x = -0.5, y = 2, z = -0.5},
+			maxvel = {x = 0.5, y = 4, z = 0.5},
+			minacc = {x = 0, y = 0.5, z = 0},
+			maxacc = {x = 0, y = 1, z = 0},
+			minexptime = 1,
+			maxexptime = 2,
+			minsize = 2,
+			maxsize = 4,
+			collisiondetection = false,
+			texture = "lualore_particle_arrow_up.png^[colorize:yellow:180",
+			glow = 14,
+		})
+
+		return true
+	end
+
+	return false
+end
+
+--------------------------------------------------------------------
 -- WIZARD ATTACK BEHAVIOR
 --------------------------------------------------------------------
 
@@ -886,6 +1018,22 @@ end
 
 function lualore.wizard_magic.red_do_custom(self, dtime)
 	if self.attack and self.state == "attack" then
+		-- Initialize teleport cooldown timer
+		if not self.nv_teleport_cooldown then
+			self.nv_teleport_cooldown = 0
+		end
+
+		-- Update cooldown
+		self.nv_teleport_cooldown = self.nv_teleport_cooldown + dtime
+
+		-- Use teleport ability if cooldown is ready (20 seconds)
+		if self.nv_teleport_cooldown >= 20 then
+			if lualore.wizard_magic.red_self_teleport(self) then
+				self.nv_teleport_cooldown = 0
+			end
+		end
+
+		-- Regular attack behavior
 		lualore.wizard_magic.wizard_attack(self, dtime, "red")
 	end
 end
@@ -898,6 +1046,89 @@ end
 
 function lualore.wizard_magic.gold_do_custom(self, dtime)
 	if self.attack and self.state == "attack" then
+		-- Initialize levitate cooldown timer
+		if not self.nv_levitate_cooldown then
+			self.nv_levitate_cooldown = 30  -- Start ready
+		end
+
+		-- Update cooldown
+		self.nv_levitate_cooldown = self.nv_levitate_cooldown + dtime
+
+		-- Handle ongoing levitation
+		if self.nv_levitating then
+			self.nv_levitate_timer = self.nv_levitate_timer + dtime
+
+			local pos = self.object:get_pos()
+			if pos then
+				-- Check if reached 3 nodes high or 3 seconds passed
+				local height_gained = pos.y - self.nv_levitate_start_y
+
+				if height_gained >= 3 or self.nv_levitate_timer >= 3 then
+					-- Stop levitating
+					self.nv_levitating = false
+					self.nv_levitate_timer = 0
+
+					-- Set gentle downward velocity
+					local vel = self.object:get_velocity()
+					self.object:set_velocity({x = vel.x, y = -2, z = vel.z})
+
+					-- Ending particle effect
+					minetest.add_particlespawner({
+						amount = 30,
+						time = 0.5,
+						minpos = {x = pos.x - 0.5, y = pos.y, z = pos.z - 0.5},
+						maxpos = {x = pos.x + 0.5, y = pos.y + 1, z = pos.z + 0.5},
+						minvel = {x = -1, y = -1, z = -1},
+						maxvel = {x = 1, y = 0.5, z = 1},
+						minacc = {x = 0, y = -2, z = 0},
+						maxacc = {x = 0, y = -3, z = 0},
+						minexptime = 0.8,
+						maxexptime = 1.5,
+						minsize = 1.5,
+						maxsize = 3,
+						collisiondetection = false,
+						texture = "lualore_particle_star.png^[colorize:yellow:180",
+						glow = 12,
+					})
+				else
+					-- Continue levitating - maintain upward force
+					local vel = self.object:get_velocity()
+					if vel.y < 3 then
+						self.object:set_velocity({x = vel.x, y = 4, z = vel.z})
+					end
+
+					-- Continuous golden particles while levitating
+					if math.random() < 0.3 then
+						minetest.add_particlespawner({
+							amount = 3,
+							time = 0.2,
+							minpos = {x = pos.x - 0.3, y = pos.y, z = pos.z - 0.3},
+							maxpos = {x = pos.x + 0.3, y = pos.y + 0.5, z = pos.z + 0.3},
+							minvel = {x = -0.2, y = 0.5, z = -0.2},
+							maxvel = {x = 0.2, y = 1, z = 0.2},
+							minacc = {x = 0, y = 0.2, z = 0},
+							maxacc = {x = 0, y = 0.5, z = 0},
+							minexptime = 0.5,
+							maxexptime = 1,
+							minsize = 1.5,
+							maxsize = 2.5,
+							collisiondetection = false,
+							texture = "lualore_particle_arrow_up.png^[colorize:yellow:180",
+							glow = 12,
+						})
+					end
+				end
+			end
+		else
+			-- Use levitate ability if cooldown is ready (30 seconds)
+			if self.nv_levitate_cooldown >= 30 then
+				if lualore.wizard_magic.gold_self_levitate(self) then
+					self.nv_levitate_cooldown = 0
+				end
+			end
+		end
+
+		-- Regular attack behavior
 		lualore.wizard_magic.wizard_attack(self, dtime, "gold")
 	end
 end
