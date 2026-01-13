@@ -332,13 +332,13 @@ function lualore.wizard_magic.gold_levitate(self, target)
 
 	local old_physics = target:get_physics_override()
 	player_effects[player_name].levitate = true
-	player_effects[player_name].levitate_timer = 3
+	player_effects[player_name].levitate_timer = 2.5
 	player_effects[player_name].levitate_height = 0
 	player_effects[player_name].old_physics = old_physics
 
 	-- Apply negative gravity to float up
 	target:set_physics_override({
-		gravity = -0.1
+		gravity = -0.08
 	})
 
 	-- Visual effect with upward arrow particles
