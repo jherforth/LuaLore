@@ -80,7 +80,7 @@ function lualore.wizard_magic.red_teleport_attack(self, target)
 	-- Play magic sound (teleport uses generic magic sound)
 	minetest.sound_play("magic", {
 		pos = caster_pos,
-		gain = 0.15,
+		gain = 0.05,
 		max_hear_distance = 32
 	}, true)
 
@@ -363,7 +363,7 @@ function lualore.wizard_magic.gold_levitate(self, target)
 	return true
 end
 
--- Spell 2: Shrinking Curse (yellow particles, shrink player for 15 seconds)
+-- Spell 2: Shrinking Curse (yellow particles, shrink player for 5 seconds)
 --
 -- FIELD OF VIEW (FOV) ADJUSTMENT GUIDE:
 -- The FOV parameter controls how "zoomed in" or "zoomed out" the player's view is when shrunken.
@@ -417,7 +417,7 @@ function lualore.wizard_magic.gold_transform(self, target)
 	local old_fov = target:get_fov()
 
 	player_effects[player_name].shrunken = true
-	player_effects[player_name].shrink_timer = 10
+	player_effects[player_name].shrink_timer = 5
 
 	-- Only store original values if not already stored (prevents compounding if check fails)
 	if not player_effects[player_name].old_shrink_physics then
@@ -438,8 +438,8 @@ function lualore.wizard_magic.gold_transform(self, target)
 
 	-- Slow player down (use absolute values, not relative, to prevent compounding)
 	target:set_physics_override({
-		speed = 0.5,
-		jump = 0.7
+		speed = 0.25,
+		jump = 0.5
 	})
 
 	-- Shrink field of view (wider to reduce claustrophobia)
