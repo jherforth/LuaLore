@@ -71,10 +71,10 @@ The cave castle contains four powerful wizards that spawn together as a boss fig
 **Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 3 (wizards rarely use melee)
 
 **Spell: Blindness** (Black Particles)
-- Creates a dense cloud of large black particles that fully obscure vision for 10 seconds
-- Particles stay attached to player's field of view
-- Multiple particle spawners ensure complete visual coverage
-- Makes it extremely difficult to see anything
+- Creates swirling black particles that obscure vision for 10 seconds
+- Particles zoom around the player's field of view making it hard to see
+- Multiple particle layers create a chaotic visual effect
+- Vision is heavily obscured but not completely blocked
 - Does not cause damage
 - Cooldown: 2.5 seconds
 
@@ -178,7 +178,7 @@ Spells use cloud particles with color modifiers:
 - White: Hyper speed
 - Blue: Levitation
 - Yellow: Shrinking curse
-- Black: Blindness (multiple continuous spawners for full vision coverage)
+- Black: Blindness (swirling particles with velocity that obscure but don't block vision)
 
 ### Spell Cooldowns
 All spells have a 2.5-second cooldown, making wizards aggressive spell casters who constantly pressure players with magic attacks.

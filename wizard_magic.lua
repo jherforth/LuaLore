@@ -385,26 +385,31 @@ function lualore.wizard_magic.black_blindness(self, target)
 	player_effects[player_name].blind_timer = 10
 	player_effects[player_name].blind_particles = {}
 
-	-- Create a dense cloud of large black particles that stays attached to player view
-	-- We'll create multiple particle spawners for full coverage
-	for i = 1, 5 do
+	-- Create swirling black particles that obscure vision without completely blocking it
+	-- TWEAK PARAMETERS:
+	-- - 'amount' controls particle density (higher = more particles, currently 50 per spawner)
+	-- - 'minsize/maxsize' controls particle size (currently 8-18, increase for more coverage)
+	-- - 'minvel/maxvel' controls particle movement speed (higher values = faster movement)
+	-- - Loop count (currently 3) controls total volume (more loops = more particle layers)
+
+	for i = 1, 3 do  -- Number of particle spawner layers (increase for more density)
 		local spawner_id = minetest.add_particlespawner({
-			amount = 100,
-			time = 0,  -- Infinite spawner
-			minpos = {x = -0.1, y = -0.1, z = 0.1},
-			maxpos = {x = 0.1, y = 0.1, z = 0.3},
-			minvel = {x = 0, y = 0, z = 0},
-			maxvel = {x = 0, y = 0, z = 0},
-			minacc = {x = 0, y = 0, z = 0},
+			amount = 50,  -- Particles spawned per second (increase for more density)
+			time = 0,  -- Infinite spawner (runs until manually deleted)
+			minpos = {x = -0.2, y = -0.2, z = 0.1},  -- Spawn area in front of player
+			maxpos = {x = 0.2, y = 0.2, z = 0.4},
+			minvel = {x = -1.5, y = -1.5, z = -0.5},  -- Particle velocity (makes them swirl)
+			maxvel = {x = 1.5, y = 1.5, z = 0.5},
+			minacc = {x = 0, y = 0, z = 0},  -- No acceleration
 			maxacc = {x = 0, y = 0, z = 0},
-			minexptime = 0.5,
-			maxexptime = 1.0,
-			minsize = 20,
-			maxsize = 30,
+			minexptime = 0.8,  -- Particle lifetime (how long each particle exists)
+			maxexptime = 1.2,
+			minsize = 8,  -- Minimum particle size (increase for more coverage)
+			maxsize = 18,  -- Maximum particle size (increase for more coverage)
 			collisiondetection = false,
-			attached = target,
-			texture = "default_cloud.png^[colorize:black:255",
-			glow = 0,
+			attached = target,  -- Particles follow player
+			texture = "default_cloud.png^[colorize:black:255",  -- Black cloud texture
+			glow = 0,  -- No glow
 		})
 		table.insert(player_effects[player_name].blind_particles, spawner_id)
 	end
