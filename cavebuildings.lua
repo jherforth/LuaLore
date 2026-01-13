@@ -93,6 +93,17 @@ local function is_valid_cave_floor(pos, data, area)
     local castle_width = 20
     local castle_height = 15
 
+    -- Get area bounds
+    local minp = area.MinEdge
+    local maxp = area.MaxEdge
+
+    -- Check if all required positions are within bounds
+    if pos.x - castle_width/2 < minp.x or pos.x + castle_width/2 > maxp.x or
+       pos.z - castle_width/2 < minp.z or pos.z + castle_width/2 > maxp.z or
+       floor_y < minp.y or pos.y + castle_height > maxp.y then
+        return false
+    end
+
     -- Check for solid floor below (sample multiple points)
     for x = pos.x - castle_width/2, pos.x + castle_width/2, 3 do
         for z = pos.z - castle_width/2, pos.z + castle_width/2, 3 do
@@ -134,21 +145,25 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
     minetest.log("action", "[Lualore] Attempting castle spawn in chunk " ..
         minetest.pos_to_string(minp) .. " to " .. minetest.pos_to_string(maxp))
 
-    -- Read the voxel data
+    -- Read the voxel data with a buffer (castle needs 20x15x20 space)
     local vm = minetest.get_voxelmanip()
-    local emin, emax = vm:read_from_map(minp, maxp)
+    local buffer = 30  -- Extra space for castle checks
+    local read_minp = {x = minp.x - buffer, y = minp.y - buffer, z = minp.z - buffer}
+    local read_maxp = {x = maxp.x + buffer, y = maxp.y + buffer, z = maxp.z + buffer}
+    local emin, emax = vm:read_from_map(read_minp, read_maxp)
     local area = VoxelArea:new({MinEdge = emin, MaxEdge = emax})
     local data = vm:get_data()
 
-    -- Try to find a valid position in this chunk
+    -- Try to find a valid position in this chunk (stay well within original chunk bounds)
     local attempts = 0
+    local margin = 15
     while attempts < 10 do
         attempts = attempts + 1
 
         local test_pos = {
-            x = pr:next(minp.x + 25, maxp.x - 25),
-            y = pr:next(minp.y + 20, maxp.y - 20),
-            z = pr:next(minp.z + 25, maxp.z - 25),
+            x = pr:next(minp.x + margin, maxp.x - margin),
+            y = pr:next(minp.y + margin, maxp.y - margin),
+            z = pr:next(minp.z + margin, maxp.z - margin),
         }
 
         -- Check if position has valid floor
