@@ -1,20 +1,10 @@
 local S = minetest.get_translator("lualore")
 
 -- ===================================================================
--- DM STATUE NODE (prize for defeating wizards)
+-- DM STATUE (prize for defeating wizards)
 -- ===================================================================
-
--- Register statue node if caverealms isn't loaded
-if not minetest.registered_nodes["caverealms:dm_statue"] then
-    minetest.register_node("caverealms:dm_statue", {
-        description = "Dungeon Master Statue",
-        tiles = {"default_obsidian.png^default_mese_crystal.png"},
-        groups = {cracky = 1, level = 2},
-        sounds = default.node_sound_stone_defaults(),
-        light_source = 5,
-        drop = "caverealms:dm_statue"  -- Drops itself as the prize
-    })
-end
+-- The caverealms:dm_statue is from the caverealms mod (dependency)
+-- It's spawned in cave castles as the prize for defeating the wizards
 
 -- ===================================================================
 -- CAVE CASTLE SPAWNING - Simple decoration approach like villages
