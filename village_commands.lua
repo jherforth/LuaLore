@@ -20,7 +20,6 @@ local marker_to_biome = {
     -- Desert
     ["lualore:hookah"] = "desert",
     ["lualore:desertcarpet"] = "desert",
-    ["lualore:desertcage"] = "desert",
     -- Ice
     ["lualore:sledge"] = "ice",
     -- Lake
@@ -28,11 +27,8 @@ local marker_to_biome = {
     ["lualore:hangingfish"] = "lake",
     -- Savanna
     ["lualore:savannashrine"] = "savanna",
-    ["lualore:savannathrone"] = "savanna",
-    ["lualore:savannavessels"] = "savanna",
-    -- Jungle/Cannibal
-    ["lualore:cannibalshrine"] = "cannibal",
-    ["lualore:driedpeople"] = "cannibal",
+    -- Jungle
+    ["lualore:jungleshrine"] = "cannibal",
 }
 
 -- Build marker list for detection
@@ -211,3 +207,4 @@ minetest.register_chatcommand("reset_village_tracking", {
 })
 
 print(S("[MOD] Native Villages - Village management commands loaded"))
+
