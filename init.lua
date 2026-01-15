@@ -72,7 +72,6 @@ dofile(modpath .. "/wizards/cave_wizards.lua")
 -- 6. Optional/fun extras
 -- dofile(modpath .. "/buyablestuff.lua")
 dofile(modpath .. "/explodingtoad.lua")
-dofile(modpath .. "/hunger.lua")
 dofile(modpath .. "/loot.lua")
 
 -- 7. Custom mob spawning (if exists)
