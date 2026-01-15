@@ -13,7 +13,7 @@ The mod generates villages in six distinct biomes, each with unique architecture
 - **Savanna Villages** - Tribal communities with ceremonial shrines
 - **Lake Villages** - Fishing communities built near water
 - **Ice Villages** - Hardy settlements in frozen tundra
-- **Cannibal Villages** - Dangerous jungle tribes with unique customs
+- **Jungle Villages** - Dangerous jungle tribes with unique customs
 
 ### 👥 Diverse Villager Classes
 
@@ -123,7 +123,7 @@ Each biome features unique structures:
 - **Savanna**: Thatched huts, shrines, thrones, wells, witch houses
 - **Lake**: Waterfront houses, harbours, fish traps
 - **Ice**: Igloos, sledges, log piles, pelt storage
-- **Cannibal**: Tribal houses, cages, towers, ritual pits, shrines
+- **Jungle**: Tribal houses, cages, towers, ritual pits, shrines
 
 **Village Generation:**
 - Villages generate naturally in their respective biomes
@@ -163,19 +163,19 @@ The mod includes numerous decorative and functional items:
 ## Configuration
 
 ### Visual Indicators
-Toggle mood indicators in `npcmood.lua`:
+Toggle mood indicators in `villagers/systems/npcmood.lua`:
 ```lua
 nativevillages.mood.enable_visual_indicators = true  -- false to disable
 ```
 
 ### Sound Repeat Delay
-Adjust how often NPCs play sounds in `npcmood.lua`:
+Adjust how often NPCs play sounds in `villagers/systems/npcmood.lua`:
 ```lua
 nativevillages.mood.sound_repeat_delay = 10  -- seconds between sounds
 ```
 
 ### Village Size
-Adjust village compactness in `village_noise.lua`:
+Adjust village compactness in `villagers/systems/village_noise.lua`:
 ```lua
 -- For single mapchunk villages (80 nodes)
 spread = {x = 80, y = 80, z = 80}
@@ -188,7 +188,7 @@ spread = {x = 150, y = 150, z = 150}
 ```
 
 ### Smart Doors
-Adjust door detection in `smart_doors.lua`:
+Adjust door detection in `villagers/systems/smart_doors.lua`:
 ```lua
 DOOR_CHECK_INTERVAL = 1.0     -- Check for NPCs every second
 DOOR_DETECTION_RADIUS = 2.5   -- How close NPCs need to be
@@ -196,7 +196,7 @@ DOOR_CLOSE_DELAY = 3          -- Seconds to wait before closing
 ```
 
 ### Village Spawning
-Village generation is currently disabled by default. Enable it by uncommenting the `minetest.register_on_generated` section in `villagers.lua`.
+Village generation is currently disabled by default. Enable it by uncommenting the `minetest.register_on_generated` section in `villagers/systems/villagers.lua`.
 
 ## Usage
 
@@ -242,27 +242,53 @@ Point at the mood indicator sprite above an NPC's head to see:
 ### File Structure
 
 ```
-nativevillages/
-├── init.lua                 # Main mod initialization
-├── mod.conf                 # Mod metadata
-├── npcmood.lua              # Mood and sound system
-├── villagers.lua            # Villager definitions and behavior
-├── villages.lua             # Village generation
-├── hunger.lua               # Hunger system
-├── buyablestuff.lua         # Tradeable items
-├── *blocks.lua              # Biome-specific blocks
-├── *buildings.lua           # Biome-specific structures
-├── explodingtoad.lua        # Special entity
-├── models/                  # 3D models (.b3d)
-├── textures/                # Textures and sprites
-├── sounds/                  # Sound effects (.ogg)
-├── schematics/              # Building structures (.mts)
-└── locale/                  # Translations
+lualore/
+├── init.lua                          # Main mod initialization and load order
+├── mod.conf                          # Mod metadata and dependencies
+├── intllib.lua                       # Internationalization library
+├── villagers/                        # All villager and village systems
+│   ├── HOW_TO_MODIFY_TRADES.md      # Trading system documentation
+│   ├── REPOPULATE_VILLAGERS.md      # Villager spawning guide
+│   ├── blocks/                       # Biome-specific decorative blocks
+│   │   ├── jungleblocks.lua
+│   │   ├── savannablocks.lua
+│   │   ├── arcticblocks.lua
+│   │   ├── grasslandblocks.lua
+│   │   ├── lakeblocks.lua
+│   │   └── desertblocks.lua
+│   ├── buildings/                    # Biome-specific building generators
+│   │   ├── junglebuildings.lua
+│   │   ├── savannabuildings.lua
+│   │   ├── icebuildings.lua
+│   │   ├── grasslandbuildings.lua
+│   │   ├── lakebuildings.lua
+│   │   └── desertbuildings.lua
+│   ├── systems/                      # Core villager and village systems
+│   │   ├── npcmood.lua              # Mood and sound system
+│   │   ├── villagers.lua            # Villager definitions and behavior
+│   │   ├── villager_behaviors.lua   # NPC AI and interaction logic
+│   │   ├── house_spawning.lua       # Villager spawn system
+│   │   ├── village_noise.lua        # Village generation parameters
+│   │   ├── village_commands.lua     # Admin commands
+│   │   ├── smart_doors.lua          # Automatic door system
+│   │   └── witch_magic.lua          # Witch abilities
+│   └── extras/                       # Optional fun content
+│       ├── explodingtoad.lua        # Explosive toad entity
+│       └── loot.lua                 # Loot tables and drops
+├── wizards/                          # Cave wizard system
+│   ├── WIZARD_SYSTEM.md             # Wizard documentation
+│   ├── cave_wizards.lua             # Wizard entity definitions
+│   ├── wizard_magic.lua             # Wizard abilities
+│   └── cavebuildings.lua            # Underground structures
+├── models/                           # 3D models (.b3d)
+├── textures/                         # Textures and sprites
+├── sounds/                           # Sound effects (.ogg)
+└── schematics/                       # Building structures (.mts)
 ```
 
 ## Credits
 
-This mod builds upon various Luanti modding techniques and community contributions, including code and snippets from the following:
+This mod builds upon various Luanti modding techniques and community contributions, including code and snippets, and sometimes just good old inspiration, from the following:
 
 - FreeLikeGNU's Witches https://content.luanti.org/packages/FreeLikeGNU/witches
 - Shaft's Automatic Door Opening https://content.luanti.org/packages/shaft/auto_door
