@@ -276,8 +276,8 @@ local function find_cave_castle_center(minp, maxp)
 		-- Spawn wizards slightly above the statue position
 		local spawn_center = {
 			x = statue_pos.x,
-			y = statue_pos.y + 7,
-			z = statue_pos.z + 6
+			y = statue_pos.y + 8,
+			z = statue_pos.z + 3
 		}
 
 		minetest.log("action", "[lualore] Found dm_statue at " .. minetest.pos_to_string(statue_pos))
