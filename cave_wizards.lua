@@ -32,8 +32,8 @@ load_spawned_groups()
 
 local wizard_types = {
 	{
-		name = "redWizard",
-		texture = "redWizard.png",
+		name = "redwizard",
+		texture = "redwizard.png",
 		armor_item = "3d_armor:chestplate_bronze",
 		do_custom = lualore.wizard_magic.red_do_custom,
 		drops = {
@@ -42,8 +42,8 @@ local wizard_types = {
 		}
 	},
 	{
-		name = "whiteWizard",
-		texture = "whiteWizard.png",
+		name = "whitewizard",
+		texture = "whitewizard.png",
 		armor_item = "3d_armor:chestplate_steel",
 		do_custom = lualore.wizard_magic.white_do_custom,
 		drops = {
@@ -52,7 +52,7 @@ local wizard_types = {
 		}
 	},
 	{
-		name = "goldWizard",
+		name = "goldwizard",
 		texture = "goldenWizard.png",
 		armor_item = "3d_armor:chestplate_gold",
 		do_custom = lualore.wizard_magic.gold_do_custom,
@@ -63,8 +63,8 @@ local wizard_types = {
 		}
 	},
 	{
-		name = "blackWizard",
-		texture = "blackWizard.png",
+		name = "blackwizard",
+		texture = "blackwizard.png",
 		armor_item = "3d_armor:chestplate_mithril",
 		do_custom = lualore.wizard_magic.black_do_custom,
 		drops = {
@@ -289,7 +289,7 @@ end
 
 local function spawn_wizard_boss_group(center_pos)
 	-- Spawn all 4 wizards around the center in a circle
-	local wizards = {"redWizard", "whiteWizard", "goldWizard", "blackWizard"}
+	local wizards = {"redwizard", "whitewizard", "goldwizard", "blackwizard"}
 	local radius = 6
 	local spawned_count = 0
 
@@ -403,10 +403,10 @@ minetest.register_chatcommand("spawn_wizard", {
 		if not player then return false, "Player not found" end
 
 		local wizard_map = {
-			red = "redWizard",
-			white = "whiteWizard",
-			gold = "goldWizard",
-			black = "blackWizard"
+			red = "redwizard",
+			white = "whitewizard",
+			gold = "goldwizard",
+			black = "blackwizard"
 		}
 
 		local wizard_name = wizard_map[param:lower()]
