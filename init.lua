@@ -39,7 +39,7 @@ end
 -- ===================================================================
 
 -- 1. Nodes & blocks (must come first)
-dofile(modpath .. "/cannibalblocks.lua")
+dofile(modpath .. "/jungleblocks.lua")
 dofile(modpath .. "/savannablocks.lua")
 dofile(modpath .. "/arcticblocks.lua")
 dofile(modpath .. "/grasslandblocks.lua")
