@@ -31,11 +31,11 @@ Scans for beds and spawns villagers to repopulate a village.
 
 **Biomes Detected:**
 - Grassland (default)
-- Desert (hookah, carpet, cage)
+- Desert (hookah, carpet)
 - Ice/Arctic (sledge)
 - Lake (fishtrap, hanging fish)
-- Savanna (shrine, throne, vessels)
-- Jungle/Cannibal (cannibal shrine, dried people)
+- Savanna (shrine)
+- Jungle (cannibal shrine)
 
 ### `/reset_village_tracking`
 
