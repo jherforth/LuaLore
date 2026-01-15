@@ -1,12 +1,45 @@
 # Sky Valkyrie Sentinel Boss Fight System
 
 ## Overview
-The floating islands contain four powerful Valkyrie Sentinels that spawn together as a boss fight. Each sentinel is an elite sky warrior with unique aerial strikes, featuring wind gusts, spear-like thrusts, and divine trials with dramatic visual effects and gameplay mechanics. They use the standard SAM character model with armored textures and flowing capes.
+The floating islands contain four powerful Valkyrie Sentinels that spawn randomly as a boss fight. Each sentinel is an elite sky warrior with unique aerial strikes, featuring wind gusts, spear-like thrusts, and divine trials with dramatic visual effects and gameplay mechanics, where two of the strikes are assigned to the spawned valkyrie randomly. They use the standard SAM character model with their associated texture and wing texture color. When defeated, they drop the wings as an item that gives flying power.
 
-## Valkyrie Types & Strikes
+## Valkyrie Types
 
 ### Blue Valkyrie (Fury Sentinel)
 **Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 8 (aggressive close-range fighters)
+
+**Drops:**
+- 2-5 Mese Crystals
+- 1-3 Diamonds
+- Blue Wings
+
+### Violet Valkyrie (Gale Sentinel)
+**Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 8 (aggressive close-range fighters)
+
+**Drops:**
+- 2-5 Mese Crystals
+- 1-3 Diamonds
+- Violet Wings
+
+### Gold Valkyrie (Thunder Sentinel)
+**Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 8 (aggressive close-range fighters)
+
+**Drops:**
+- 2-5 Mese Crystals
+- 1-3 Diamonds
+- 3-7 Gold Lumps
+- Gold Wings
+
+### Green Valkyrie (Eclipse Sentinel)
+**Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 8 (aggressive close-range fighters)
+
+**Drops:**
+- 2-5 Mese Crystals
+- 1-3 Diamonds
+- 2-5 Obsidian
+- Green Wings
+
+## Available Strikes
 
 **Strike 1: Wind Dash** (Purple Wind Trail Particles)
 - Dashes forward like a spear thrust, knocking the player 15 blocks away in a random direction
@@ -18,60 +51,35 @@ The floating islands contain four powerful Valkyrie Sentinels that spawn togethe
 - Red whirlwind-shaped particles envelop the player
 - No additional damage
 - Cooldown: 2.5 seconds
-
-**Drops:**
-- 2-5 Mese Crystals
-- 1-3 Diamonds
-- 1-2 Aether Shards (new sky resource)
-
-### Violet Valkyrie (Gale Sentinel)
-**Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 8 (aggressive close-range fighters)
-
-**Strike 1: Frost Bind** (Green Ice Shard Particles)
+  
+**Strike 3: Frost Bind** (Green Ice Shard Particles)
 - Lasts 15 seconds
 - Randomly freezes player movement for 1 second (every 3-5 seconds)
 - Green ice shard particle bursts when frozen
 - Causes small frostbite damage over time (1 heart total)
 - Cooldown: 2.5 seconds
 
-**Strike 2: Sky Surge** (White Gale Burst Particles)
+**Strike 4: Sky Surge** (White Gale Burst Particles)
 - Lasts 15 seconds
 - Boosts player speed by 200% and jump height
 - White gale burst particles trail the player
 - Makes aerial navigation trickier on islands
 - Cooldown: 2.5 seconds
 
-**Drops:**
-- 2-5 Mese Crystals
-- 1-3 Diamonds
-- 1-2 Aether Shards
-
-### Gold Valkyrie (Thunder Sentinel)
-**Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 8 (aggressive close-range fighters)
-
-**Strike 1: Thunder Lift** (Blue Lightning Bolt Particles)
+**Strike 5: Thunder Lift** (Blue Lightning Bolt Particles)
 - Hurls spear energy, lifting player upward for 3 seconds (up to 10 nodes)
 - Player drops afterward, taking fall damage
 - Blue lightning bolt particles surge around the player
 - Cooldown: 2.5 seconds
 
-**Strike 2: Storm Compress** (Yellow Thunder Cloud Particles)
+**Strike 6: Storm Compress** (Yellow Thunder Cloud Particles)
 - Compresses air, shrinking player model to half size for 15 seconds
 - Reduces speed to 50% and jump to 70%
 - Narrows field of view to 50% (tunnel vision)
 - Yellow thunder cloud particles during shrink; gold sparks when expanding
 - Cooldown: 2.5 seconds
 
-**Drops:**
-- 2-5 Mese Crystals
-- 1-3 Diamonds
-- 3-7 Gold Lumps
-- 2-3 Aether Shards
-
-### Green Valkyrie (Eclipse Sentinel)
-**Stats:** HP: 100-150 | Armor: 150 | Melee Damage: 8 (aggressive close-range fighters)
-
-**Strike: Shadow Veil** (Black Storm Cloud Particles)
+**Strike 7: Shadow Veil** (Black Storm Cloud Particles)
 - Summons swirling black storm clouds obscuring vision for 10 seconds
 - Particles whirl around the player's field of view
 - Multiple layers create chaotic sky storm effect
@@ -79,26 +87,22 @@ The floating islands contain four powerful Valkyrie Sentinels that spawn togethe
 - No damage
 - Cooldown: 2.5 seconds
 
-**Drops:**
-- 2-5 Mese Crystals
-- 1-3 Diamonds
-- 2-5 Obsidian
-
 ## Spawn Mechanics
 
 ### Automatic Spawning
-- Valkyries spawn together as a group of 4 in sky fortresses on floating islands
-- Only spawns in generated floating islands (Y > 100)
+- Valkyries spawn individually and randomly in sky fortresses on floating islands
+- Only spawns in generated floating islands (Y > 500)
 - Requires significant cloudstone or aether block presence (50+ blocks) to detect fortress
-- Each fortress spawns valkyries only once (tracked in mod storage)
-- Valkyries positioned in a defensive circle around the fortress center
+- Each fortress spawns valkyrie only once (tracked in mod storage)
+- Valkyries patrol in a defensive circle around the fortress center
+- The corresponding wing color will spawn on the player model
+
+### Strike Assignments
+- Two of the seven strikes are assigned at random to the spawned Valkyrie
+- This mechanic keeps it uncertain as to how exactly the Valkyrie can be defeated.
 
 ### Manual Spawning (Testing)
 Players with "give" privilege can spawn valkyries using these commands:
-
-**Spawn entire boss group:**
-/spawn_valkyries
-Spawns all 4 valkyries around you in a circle (requires at least 3 to succeed)
 
 **Spawn individual valkyrie:**
 /spawn_valkyrie <type>
@@ -111,7 +115,7 @@ Examples:
 ## Combat Strategy
 
 ### General Tips
-- Each valkyrie alternates between their two strikes (except Black Valkyrie who has one)
+- Each valkyrie alternates between their two strikes
 - **Strike range: 4-20 blocks** - Valkyries charge in for melee but use strikes at distance
 - **Valkyries pursue aggressively** - They close gaps with dashes if you retreat beyond 10 blocks
 - **Strike cooldown: 2.5 seconds** - Frequent aerial assaults keep pressure high
@@ -121,33 +125,11 @@ Examples:
 - Valkyries do not spawn in regular villages or caves, only sky fortresses
 - Dodge their charges and use island terrain for cover
 
-### Countering Each Valkyrie
-
-**Blue Valkyrie:**
-- Sidestep Wind Dash to avoid knockback into voids
-- Counter Tempest Spin by sheathing sword and sprint-jumping away
-- Watch purple trails signaling incoming dash
-
-**Violet Valkyrie:**
-- Break line of sight during Sky Surge to regain control mid-air
-- Time attacks around Frost Bind freezes
-- Use fire items or warmth to counter chill damage
-
-**Gold Valkyrie:**
-- Feather fall or water bucket for Thunder Lift drops
-- Hug island edges or low platforms to limit lift height
-- If compressed, prioritize evasion over attack
-
-**Green Valkyrie:**
-- Rely on audio cues and peripheral vision in Shadow Veil
-- Lure to lit areas or use torches for contrast
-- Fight with back to solid island ground
-
 ### Recommended Gear
 - Strong armor (diamond or better, with feather falling enchant if available)
 - Healing items (bread, golden apples, or sky potions)
 - Ranged weapons (bows) and melee sword for mix
-- Elytra or glider mods for aerial mobility
+- Glider mods for aerial mobility
 - Water bucket (negates fall damage)
 - Torches for illuminating dark storm effects
 
@@ -156,6 +138,7 @@ Examples:
 ### New Files
 - `valkyrie_strikes.lua` - Strike system and effects
 - `sky_valkyries.lua` - Valkyrie entity registration and spawning
+- `sky_blocks.lua` - Wing registration and funtions
 - `VALKYRIE_SYSTEM.md` - This documentation file
 
 ### Modified Files
@@ -190,6 +173,13 @@ Custom particle textures:
 ### Strike Cooldowns
 All strikes have a 2.5-second cooldown for relentless sky battles.
 
+### Rewards
+The wings of the Valkyrie will be the reward, and each color will have varying durability during flight.
+- Green: Shortest flight time durability, 10% increase in movement speed
+- Blue: Medium flight time durability, 20% increase in movement speed while in flight
+- Violet: Medium flight time durability, 35% increase in movement speed while in flight
+- Gold: Allows for the longest flight time durability, and 50% increased movement speed while in flight
+
 ## Dependencies
 - `mobs_redo` (required for mob system)
 - `default` (for particle textures and item drops)
@@ -201,3 +191,4 @@ All strikes have a 2.5-second cooldown for relentless sky battles.
 - Unique drops reward sky adventures
 - Group fights test aerial combat skills on precarious islands
 - Kid-friendly: Effects disorient but emphasize dodging and strategy over gore
+- Wings are not craftable
