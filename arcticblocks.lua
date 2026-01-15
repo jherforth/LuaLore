@@ -32,3 +32,4 @@ minetest.register_craft({
 	output = "default:bronzeblock",
 	recipe = "lualore:sledge",
 })
+
