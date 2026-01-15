@@ -53,7 +53,7 @@ local wizard_types = {
 	},
 	{
 		name = "goldwizard",
-		texture = "goldenWizard.png",
+		texture = "goldwizard.png",
 		armor_item = "3d_armor:chestplate_gold",
 		do_custom = lualore.wizard_magic.gold_do_custom,
 		drops = {
