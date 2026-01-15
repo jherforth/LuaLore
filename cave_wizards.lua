@@ -276,7 +276,7 @@ local function find_cave_castle_center(minp, maxp)
 		-- Spawn wizards slightly above the statue position
 		local spawn_center = {
 			x = statue_pos.x,
-			y = statue_pos.y + 1,
+			y = statue_pos.y + 7,
 			z = statue_pos.z
 		}
 
