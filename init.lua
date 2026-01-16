@@ -74,7 +74,15 @@ dofile(modpath .. "/wizards/cave_wizards.lua")
 dofile(modpath .. "/villagers/extras/explodingtoad.lua")
 dofile(modpath .. "/villagers/extras/loot.lua")
 
--- 7. Custom mob spawning (if exists)
+-- 7. Valkyrie and Sky Folk systems
+dofile(modpath .. "/valkyrie/valkyrie_strikes.lua")
+dofile(modpath .. "/valkyrie/sky_blocks.lua")
+dofile(modpath .. "/valkyrie/sky_valkyries.lua")
+dofile(modpath .. "/valkyrie/sky_folk.lua")
+dofile(modpath .. "/valkyrie/sky_villages.lua")
+dofile(modpath .. "/valkyrie/floating_buildings.lua")
+
+-- 8. Custom mob spawning (if exists)
 if mobs.custom_spawn_lualore then
     dofile(modpath .. "/spawn.lua")
 end
@@ -84,5 +92,5 @@ end
 -- ===================================================================
 
 minetest.log("action", "[lualore] Successfully loaded — " ..
-    "6 biomes | perfect villages | villagers | cave wizards | exploding toads")
+    "6 biomes | perfect villages | villagers | cave wizards | sky valkyries | sky folk | exploding toads")
 print(S("[MOD] lualore loaded — a living world awaits you"))
