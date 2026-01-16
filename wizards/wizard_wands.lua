@@ -417,6 +417,8 @@ end
 minetest.register_tool("lualore:gold_wand", {
 	description = S("Gold Wand") .. "\n" .. S("Levitates NPCs"),
 	inventory_image = "gold_wand.png",
+	wield_image = "gold_wand.png",
+	wield_scale = {x = 1.5, y = 1.5, z = 1.0},
 	groups = {not_in_creative_inventory = 0},
 	on_use = function(itemstack, user, pointed_thing)
 		gold_wand_levitate(user, pointed_thing)
@@ -428,6 +430,8 @@ minetest.register_tool("lualore:gold_wand", {
 minetest.register_tool("lualore:white_wand", {
 	description = S("White Wand") .. "\n" .. S("Inflicts sickness on NPCs"),
 	inventory_image = "white_wand.png",
+	wield_image = "white_wand.png",
+	wield_scale = {x = 1.5, y = 1.5, z = 1.0},
 	groups = {not_in_creative_inventory = 0},
 	on_use = function(itemstack, user, pointed_thing)
 		white_wand_sick(user, pointed_thing)
@@ -439,6 +443,8 @@ minetest.register_tool("lualore:white_wand", {
 minetest.register_tool("lualore:red_wand", {
 	description = S("Red Wand") .. "\n" .. S("Teleports NPCs"),
 	inventory_image = "red_wand.png",
+	wield_image = "red_wand.png",
+	wield_scale = {x = 1.5, y = 1.5, z = 1.0},
 	groups = {not_in_creative_inventory = 0},
 	on_use = function(itemstack, user, pointed_thing)
 		red_wand_teleport(user, pointed_thing)
@@ -450,6 +456,8 @@ minetest.register_tool("lualore:red_wand", {
 minetest.register_tool("lualore:black_wand", {
 	description = S("Black Wand") .. "\n" .. S("Blinds and freezes NPCs"),
 	inventory_image = "black_wand.png",
+	wield_image = "black_wand.png",
+	wield_scale = {x = 1.5, y = 1.5, z = 1.0},
 	groups = {not_in_creative_inventory = 0},
 	on_use = function(itemstack, user, pointed_thing)
 		black_wand_blind(user, pointed_thing)
