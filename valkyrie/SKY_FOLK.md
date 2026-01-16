@@ -79,7 +79,7 @@ Spawns 10-15 Sky Folk + 1 Valkyries + basic houses (for testing).
 - Valkyrie protection creates dynamic, story-like encounters.  
 - Easy to expand: Add more types or biome variants later.
 
-## Directory tree update
+## Possible Directory tree update
 lualore/
 ├── init.lua                          # Main mod initialization and load order
 ├── mod.conf                          # Mod metadata and dependencies
@@ -123,7 +123,7 @@ lualore/
 │   ├── SKY_FOLK_SYSTEM.md           # Sky Folk passive NPCs documentation
 │   ├── sky_valkyrie.lua             # Valkyrie entity definitions & registration
 │   ├── valkyrie_strikes.lua         # Valkyrie abilities & effects
-│   ├── floating_buildings.lua       # Sky fortress / floating island structure generation
+│   ├── floating_buildings.lua       # Sky fortress / floating island structure generation 
 │   ├── sky_folk.lua                 # Sky Folk entity definitions, behaviors, AI
 │   └── sky_villages.lua             # Sky village / fortress spawning & generation logic
 ├── models/                           # 3D models (.b3d)
