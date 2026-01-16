@@ -114,6 +114,17 @@ local function deactivate_wings(player, player_name)
 
 		player:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=0, y=0, z=0})
 		player:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=0, y=0, z=0})
+		player:set_bone_position("Arm_Left", {x=-3, y=6.3, z=1}, {x=0, y=0, z=0})
+		player:set_bone_position("Arm_Right", {x=3, y=6.3, z=1}, {x=0, y=0, z=0})
+
+		minetest.after(0.1, function()
+			if player and player:is_player() then
+				player:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=0, y=0, z=0})
+				player:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=0, y=0, z=0})
+				player:set_bone_position("Arm_Left", {x=-3, y=6.3, z=1}, {x=0, y=0, z=0})
+				player:set_bone_position("Arm_Right", {x=3, y=6.3, z=1}, {x=0, y=0, z=0})
+			end
+		end)
 	end
 
 	active_wings[player_name] = nil
@@ -195,8 +206,8 @@ minetest.register_globalstep(function(dtime)
 						wing_data.was_flying = true
 					end
 
-					player:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=90, y=0, z=0})
-					player:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=-90, y=0, z=0})
+					player:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=-90, y=0, z=180})
+					player:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=90, y=180, z=0})
 
 					if ctrl.jump then
 						player:add_velocity({x=0, y=wing_info.lift_power, z=0})
@@ -238,6 +249,8 @@ minetest.register_globalstep(function(dtime)
 					if wing_data.was_flying then
 						player:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=0, y=0, z=0})
 						player:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=0, y=0, z=0})
+						player:set_bone_position("Arm_Left", {x=-3, y=6.3, z=1}, {x=0, y=0, z=0})
+						player:set_bone_position("Arm_Right", {x=3, y=6.3, z=1}, {x=0, y=0, z=0})
 						wing_data.was_flying = false
 					end
 				end

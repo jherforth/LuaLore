@@ -27,11 +27,13 @@ local function has_effect(player_name, effect_type)
 end
 
 local strike_1_wind_dash = function(self, player)
-	if not player or not player:is_player() then return end
+	if not player or not player:is_player() then return false end
 
 	local player_name = player:get_player_name()
 	local player_pos = player:get_pos()
 	local self_pos = self.object:get_pos()
+
+	if not player_pos or not self_pos then return false end
 
 	local dir = vector.direction(self_pos, player_pos)
 	local knockback = vector.multiply(dir, 15)
@@ -62,13 +64,21 @@ local strike_1_wind_dash = function(self, player)
 		gain = 0.5,
 		max_hear_distance = 16
 	})
+
+	return true
 end
 
 local strike_2_tempest_spin = function(self, player)
-	if not player or not player:is_player() then return end
+	if not player or not player:is_player() then return false end
 
 	local player_name = player:get_player_name()
 	local player_pos = player:get_pos()
+
+	if not player_pos then return false end
+
+	if has_effect(player_name, "tempest_spin") then
+		return false
+	end
 
 	add_effect(player_name, "tempest_spin", 5, {})
 
@@ -94,13 +104,21 @@ local strike_2_tempest_spin = function(self, player)
 		gain = 0.5,
 		max_hear_distance = 16
 	})
+
+	return true
 end
 
 local strike_3_frost_bind = function(self, player)
-	if not player or not player:is_player() then return end
+	if not player or not player:is_player() then return false end
 
 	local player_name = player:get_player_name()
 	local player_pos = player:get_pos()
+
+	if not player_pos then return false end
+
+	if has_effect(player_name, "frost_bind") then
+		return false
+	end
 
 	add_effect(player_name, "frost_bind", 15, {
 		next_freeze = 3,
@@ -129,13 +147,21 @@ local strike_3_frost_bind = function(self, player)
 		gain = 0.5,
 		max_hear_distance = 16
 	})
+
+	return true
 end
 
 local strike_4_sky_surge = function(self, player)
-	if not player or not player:is_player() then return end
+	if not player or not player:is_player() then return false end
 
 	local player_name = player:get_player_name()
 	local player_pos = player:get_pos()
+
+	if not player_pos then return false end
+
+	if has_effect(player_name, "sky_surge") then
+		return false
+	end
 
 	add_effect(player_name, "sky_surge", 15, {})
 
@@ -161,13 +187,17 @@ local strike_4_sky_surge = function(self, player)
 		gain = 0.5,
 		max_hear_distance = 16
 	})
+
+	return true
 end
 
 local strike_5_thunder_lift = function(self, player)
-	if not player or not player:is_player() then return end
+	if not player or not player:is_player() then return false end
 
 	local player_name = player:get_player_name()
 	local player_pos = player:get_pos()
+
+	if not player_pos then return false end
 
 	add_effect(player_name, "thunder_lift", 3, {})
 
@@ -195,13 +225,21 @@ local strike_5_thunder_lift = function(self, player)
 		gain = 0.5,
 		max_hear_distance = 16
 	})
+
+	return true
 end
 
 local strike_6_storm_compress = function(self, player)
-	if not player or not player:is_player() then return end
+	if not player or not player:is_player() then return false end
 
 	local player_name = player:get_player_name()
 	local player_pos = player:get_pos()
+
+	if not player_pos then return false end
+
+	if has_effect(player_name, "storm_compress") then
+		return false
+	end
 
 	add_effect(player_name, "storm_compress", 15, {})
 
@@ -227,13 +265,21 @@ local strike_6_storm_compress = function(self, player)
 		gain = 0.5,
 		max_hear_distance = 16
 	})
+
+	return true
 end
 
 local strike_7_shadow_veil = function(self, player)
-	if not player or not player:is_player() then return end
+	if not player or not player:is_player() then return false end
 
 	local player_name = player:get_player_name()
 	local player_pos = player:get_pos()
+
+	if not player_pos then return false end
+
+	if has_effect(player_name, "shadow_veil") then
+		return false
+	end
 
 	add_effect(player_name, "shadow_veil", 10, {})
 
@@ -259,6 +305,8 @@ local strike_7_shadow_veil = function(self, player)
 		gain = 0.5,
 		max_hear_distance = 16
 	})
+
+	return true
 end
 
 lualore.valkyrie_strikes.all_strikes = {

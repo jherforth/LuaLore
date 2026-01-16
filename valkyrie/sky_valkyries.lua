@@ -223,8 +223,8 @@ for _, valkyrie in ipairs(valkyrie_types) do
 
 				if self.object.set_bone_position then
 					if is_moving then
-						self.object:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=90, y=0, z=0})
-						self.object:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=-90, y=0, z=0})
+						self.object:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=-90, y=0, z=180})
+						self.object:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=90, y=180, z=0})
 
 						self.object:set_bone_position("Arm_Left", {x=-3, y=6.3, z=1}, {x=0, y=0, z=180 + wing_angle})
 						self.object:set_bone_position("Arm_Right", {x=3, y=6.3, z=1}, {x=0, y=0, z=-180 - wing_angle})
@@ -261,12 +261,17 @@ for _, valkyrie in ipairs(valkyrie_types) do
 							self.strike_timer = 0
 						end
 
+						if not self.strike_interval then
+							self.strike_interval = 2.5
+						end
+
 						self.strike_timer = self.strike_timer + dtime
 
 						if distance >= 4 and distance <= 25 and self.strike_timer >= self.strike_interval then
 							if not self.assigned_strikes or #self.assigned_strikes == 0 then
 								minetest.log("error", "[lualore] Valkyrie has no assigned strikes!")
 								self.assigned_strikes = lualore.valkyrie_strikes.assign_random_strikes()
+								self.current_strike = 1
 							end
 
 							local strike_func = self.assigned_strikes[self.current_strike]
@@ -274,7 +279,7 @@ for _, valkyrie in ipairs(valkyrie_types) do
 							if strike_func and type(strike_func) == "function" then
 								minetest.log("action", "[lualore] Attempting strike " .. self.current_strike .. " at distance " .. math.floor(distance))
 
-								local success = lualore.valkyrie_strikes.use_strike(self, strike_func, target)
+								local success = strike_func(self, target)
 								if success then
 									self.current_strike = self.current_strike + 1
 									if self.current_strike > #self.assigned_strikes then
@@ -287,12 +292,16 @@ for _, valkyrie in ipairs(valkyrie_types) do
 
 									self.strike_timer = 0
 								else
-									minetest.log("warning", "[lualore] Strike failed - cooldown active")
+									minetest.log("warning", "[lualore] Strike failed - cooldown or player already has effect")
+									self.strike_timer = 0
 								end
 							else
 								minetest.log("error", "[lualore] Strike function is nil or not a function! Type: " .. type(strike_func))
 								minetest.log("error", "[lualore] Current strike index: " .. self.current_strike .. " / " .. #self.assigned_strikes)
 							end
+						elseif distance < 4 then
+							local dir = vector.direction(player_pos, self_pos)
+							self.object:set_velocity(vector.multiply(dir, 2))
 						end
 
 						if distance > 8 and distance <= 25 then
