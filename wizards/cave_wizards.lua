@@ -35,42 +35,50 @@ local wizard_types = {
 		name = "redwizard",
 		texture = "redwizard.png",
 		armor_item = "3d_armor:chestplate_bronze",
+		wand_item = "lualore:red_wand",
 		do_custom = lualore.wizard_magic.red_do_custom,
 		drops = {
 			{name = "default:mese_crystal", chance = 1, min = 2, max = 5},
-			{name = "default:diamond", chance = 1, min = 1, max = 3}
+			{name = "default:diamond", chance = 1, min = 1, max = 3},
+			{name = "lualore:red_wand", chance = 1, min = 1, max = 1}
 		}
 	},
 	{
 		name = "whitewizard",
 		texture = "whitewizard.png",
 		armor_item = "3d_armor:chestplate_steel",
+		wand_item = "lualore:white_wand",
 		do_custom = lualore.wizard_magic.white_do_custom,
 		drops = {
 			{name = "default:mese_crystal", chance = 1, min = 2, max = 5},
-			{name = "default:diamond", chance = 1, min = 1, max = 3}
+			{name = "default:diamond", chance = 1, min = 1, max = 3},
+			{name = "lualore:white_wand", chance = 1, min = 1, max = 1}
 		}
 	},
 	{
 		name = "goldwizard",
 		texture = "goldwizard.png",
 		armor_item = "3d_armor:chestplate_gold",
+		wand_item = "lualore:gold_wand",
 		do_custom = lualore.wizard_magic.gold_do_custom,
 		drops = {
 			{name = "default:mese_crystal", chance = 1, min = 2, max = 5},
 			{name = "default:diamond", chance = 1, min = 1, max = 3},
-			{name = "default:gold_lump", chance = 1, min = 3, max = 7}
+			{name = "default:gold_lump", chance = 1, min = 3, max = 7},
+			{name = "lualore:gold_wand", chance = 1, min = 1, max = 1}
 		}
 	},
 	{
 		name = "blackwizard",
 		texture = "blackwizard.png",
 		armor_item = "3d_armor:chestplate_mithril",
+		wand_item = "lualore:black_wand",
 		do_custom = lualore.wizard_magic.black_do_custom,
 		drops = {
 			{name = "default:mese_crystal", chance = 1, min = 2, max = 5},
 			{name = "default:diamond", chance = 1, min = 1, max = 3},
-			{name = "default:obsidian", chance = 1, min = 2, max = 5}
+			{name = "default:obsidian", chance = 1, min = 2, max = 5},
+			{name = "lualore:black_wand", chance = 1, min = 1, max = 1}
 		}
 	}
 }
@@ -161,6 +169,13 @@ for _, wizard in ipairs(wizard_types) do
 
 			-- Initialize armor visual
 			update_wizard_armor(self, wizard.texture, wizard.armor_item)
+
+			-- Give wizard their wand as wielded item
+			if wizard.wand_item then
+				self.object:set_properties({
+					wield_item = wizard.wand_item
+				})
+			end
 		end,
 
 		on_punch = function(self, hitter, tflp, tool_capabilities, dir)
