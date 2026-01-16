@@ -1,0 +1,63 @@
+# Flat 2D butterfly wings sprite-style - for Luanti player back
+# All geometry at Y=0 (flat plane)
+# Facing +Z direction; rotate in-game if needed
+
+o FlatButterflyWings
+
+# Central body (diamond / vertical shape)
+v  0.00  0.00  0.60
+v  0.00  0.00  0.90     # top of body
+v  0.00  0.00  0.00     # bottom of body
+v  0.12  0.00  0.45
+v -0.12  0.00  0.45
+
+# Left wing - upper + lower combined in angular blocks
+v -0.25  0.00  0.85
+v -0.55  0.00  0.70
+v -0.75  0.00  0.45
+v -0.65  0.00  0.20
+v -0.40  0.00  0.35
+v -0.30  0.00  0.10
+v -0.50  0.00  0.00
+v -0.35  0.00 -0.10
+
+# Right wing (mirror)
+v  0.25  0.00  0.85
+v  0.55  0.00  0.70
+v  0.75  0.00  0.45
+v  0.65  0.00  0.20
+v  0.40  0.00  0.35
+v  0.30  0.00  0.10
+v  0.50  0.00  0.00
+v  0.35  0.00 -0.10
+
+# Very simple triangulation / quad faces
+# Body
+f 1 2 4
+f 1 4 5
+f 1 5 3
+f 4 3 5
+
+# Left wing faces (roughly outlining the shape)
+f  6  7  8
+f  6  8  9
+f  9  8 10
+f 10 11  9
+f 11 12 13
+f 13 12 14
+f  6  9 11
+f 11 13 14
+
+# Right wing (mirrored)
+f 15 16 17
+f 15 17 18
+f 18 17 19
+f 19 20 18
+f 20 21 22
+f 22 21 23
+f 15 18 20
+f 20 22 23
+
+# Optional: connect wings to body more visibly
+f  6  4  5
+f 15  4  5
