@@ -114,7 +114,15 @@ end
 
 -- Register each wizard as a mob
 for _, wizard in ipairs(wizard_types) do
-	local mob_name = "lualore:" .. wizard.name
+	-- Capture wizard values in local variables to avoid closure issues
+	local wizard_name = wizard.name
+	local wizard_texture = wizard.texture
+	local wizard_armor = wizard.armor_item
+	local wizard_wand = wizard.wand_item
+	local wizard_do_custom = wizard.do_custom
+	local wizard_drops = wizard.drops
+
+	local mob_name = "lualore:" .. wizard_name
 
 	mobs:register_mob(mob_name, {
 		type = "monster",
@@ -134,7 +142,7 @@ for _, wizard in ipairs(wizard_types) do
 		stepheight = 1.1,
 		visual = "mesh",
 		mesh = "character.b3d",
-		textures = {{wizard.texture}},
+		textures = {{wizard_texture}},
 		visual_size = {x=1.1, y=1.1},
 		makes_footstep_sound = true,
 		sounds = {},
@@ -142,14 +150,14 @@ for _, wizard in ipairs(wizard_types) do
 		walk_chance = 30,
 		run_velocity = 3.5,
 		jump = true,
-		drops = wizard.drops,
+		drops = wizard_drops,
 		water_damage = 0,
 		lava_damage = 4,
 		light_damage = 0,
 		follow = {},
 		view_range = 20,
 		fear_height = 0,
-		wield_item = wizard.wand_item,
+		wield_item = wizard_wand,
 		animation = {
 			speed_normal = 30,
 			stand_start = 0,
@@ -166,32 +174,32 @@ for _, wizard in ipairs(wizard_types) do
 		},
 
 		on_activate = function(self, staticdata, dtime_s)
-			-- Store wizard texture and armor info
-			self.wizard_base_texture = wizard.texture
-			self.wizard_armor_item = wizard.armor
-			self.wizard_wand = wizard.wand_item
+			-- Store wizard texture and armor info using local captured variables
+			self.wizard_base_texture = wizard_texture
+			self.wizard_armor_item = wizard_armor
+			self.wizard_wand = wizard_wand
 
 			-- Initialize armor visual
-			update_wizard_armor(self, wizard.texture, wizard.armor_item)
+			update_wizard_armor(self, wizard_texture, wizard_armor)
 
 			-- Set wield_item using multiple methods to ensure it works
-			if self.wizard_wand then
+			if wizard_wand then
 				-- Method 1: Set directly on entity (mobs_redo way)
-				self.wield_item = self.wizard_wand
+				self.wield_item = wizard_wand
 
 				-- Method 2: Set via properties
 				self.object:set_properties({
-					wield_item = self.wizard_wand
+					wield_item = wizard_wand
 				})
 
-				minetest.log("action", "[lualore] Set wield_item for " .. wizard.name .. " to " .. self.wizard_wand)
+				minetest.log("action", "[lualore] Set wield_item for " .. wizard_name .. " to " .. wizard_wand)
 
 				-- Also set with delay to ensure it sticks
 				minetest.after(0.1, function()
 					if self and self.object then
-						self.wield_item = self.wizard_wand
+						self.wield_item = wizard_wand
 						self.object:set_properties({
-							wield_item = self.wizard_wand
+							wield_item = wizard_wand
 						})
 					end
 				end)
@@ -204,7 +212,7 @@ for _, wizard in ipairs(wizard_types) do
 				-- Update armor visual after taking damage
 				minetest.after(0.1, function()
 					if self and self.object then
-						update_wizard_armor(self, wizard.texture, wizard.armor_item)
+						update_wizard_armor(self, wizard_texture, wizard_armor)
 					end
 				end)
 			end
@@ -214,7 +222,7 @@ for _, wizard in ipairs(wizard_types) do
 			local success, err = pcall(function()
 				-- Ensure wand is set
 				if not self.wizard_wand then
-					self.wizard_wand = wizard.wand_item
+					self.wizard_wand = wizard_wand
 				end
 
 				-- Force wand to be visible always using both methods
@@ -227,7 +235,7 @@ for _, wizard in ipairs(wizard_types) do
 				end
 
 				-- Always try to cast spells first
-				wizard.do_custom(self, dtime)
+				wizard_do_custom(self, dtime)
 
 				-- Periodically update armor visual (every 2 seconds)
 				if not self.armor_update_timer then
@@ -237,7 +245,7 @@ for _, wizard in ipairs(wizard_types) do
 				self.armor_update_timer = self.armor_update_timer + dtime
 				if self.armor_update_timer >= 2 then
 					self.armor_update_timer = 0
-					update_wizard_armor(self, wizard.texture, wizard.armor_item)
+					update_wizard_armor(self, wizard_texture, wizard_armor)
 				end
 
 				-- Keep distance from target
@@ -295,10 +303,10 @@ for _, wizard in ipairs(wizard_types) do
 	})
 
 	-- Register spawn egg
-	local display_name = wizard.name:gsub("^%l", string.upper)
+	local display_name = wizard_name:gsub("^%l", string.upper)
 	mobs:register_egg(mob_name,
 		S(display_name),
-		wizard.texture)
+		wizard_texture)
 end
 
 --------------------------------------------------------------------
