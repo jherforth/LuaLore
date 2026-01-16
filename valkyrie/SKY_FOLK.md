@@ -1,7 +1,7 @@
 # Sky Folk Passive NPC System
 
 ## Overview
-Sky Folk are peaceful, passive humanoid NPCs that inhabit floating islands and sky fortresses. They use the standard SAM character model with ethereal, flowing robe textures (white, blue, gold, green variants). They add life to the sky biomes through wandering, farming, crafting, and trading.
+Sky Folk are territorial NPCs that inhabit floating islands and sky fortresses. They use the standard SAM character model with ethereal, flowing robe texture. They add life to the sky biomes through wandering and interacting. 
 
 Sky Folk are **protected by Valkyrie Sentinels**: If a Sky Folk takes damage (from player or environment), nearby Valkyries enter a defensive rage mode (increased speed, damage, and pursuit). The sky folk are not friendly and will also attack with a melee attack. 
 
