@@ -224,7 +224,7 @@ for _, valkyrie in ipairs(valkyrie_types) do
                 if not target or not target:is_player() then
                     for _, player in ipairs(minetest.get_connected_players()) do
                         local player_pos = player:get_pos()
-                        if player_pos and vector.distance(pos, player_pos) <= self.view_range then
+                        if player_pos and pos and vector.distance(pos, player_pos) <= self.view_range then
                             self.attack = player
                             target = player
                             minetest.log("action", "[lualore] Valkyrie acquired target: " .. player:get_player_name())
@@ -243,14 +243,14 @@ for _, valkyrie in ipairs(valkyrie_types) do
                 local is_moving = false
                 local in_flight = false
 
-                if vel then
+                if vel and vel.x and vel.y and vel.z then
                     is_moving = math.abs(vel.x) > 0.5 or math.abs(vel.z) > 0.5 or math.abs(vel.y) > 0.5
                 end
 
                 -- Only fly when in combat (has a target)
                 if target and target:is_player() then
                     in_flight = true
-                    if vel then
+                    if vel and vel.x and vel.y and vel.z then
                         if math.abs(vel.x) < 0.5 and math.abs(vel.z) < 0.5 then
                             self.object:set_velocity({x=vel.x, y=hover_y, z=vel.z})
                         elseif vel.y < -2 then
@@ -259,14 +259,16 @@ for _, valkyrie in ipairs(valkyrie_types) do
                     end
                 else
                     -- No target - descend to ground if airborne
-                    local below_pos = {x=pos.x, y=pos.y - 0.5, z=pos.z}
-                    local node_below = minetest.get_node(below_pos)
+                    if pos and pos.x and pos.y and pos.z then
+                        local below_pos = {x=pos.x, y=pos.y - 0.5, z=pos.z}
+                        local node_below = minetest.get_node(below_pos)
 
-                    -- Check if there's solid ground below
-                    if node_below.name == "air" or node_below.name == "ignore" then
-                        -- Still airborne, apply descent velocity
-                        if vel then
-                            self.object:set_velocity({x=vel.x * 0.8, y=-3, z=vel.z * 0.8})
+                        -- Check if there's solid ground below
+                        if node_below.name == "air" or node_below.name == "ignore" then
+                            -- Still airborne, apply descent velocity
+                            if vel and vel.x and vel.z then
+                                self.object:set_velocity({x=vel.x * 0.8, y=-3, z=vel.z * 0.8})
+                            end
                         end
                     end
                 end
@@ -289,30 +291,47 @@ for _, valkyrie in ipairs(valkyrie_types) do
 
                 if target and target:is_player() then
                     local player_pos = target:get_pos()
+                    if not player_pos or not pos then
+                        return
+                    end
+
                     local self_pos = pos
+                    local distance = vector.distance(player_pos, self_pos)
 
-                    if player_pos and self_pos then
-                        local distance = vector.distance(player_pos, self_pos)
+                    if not self.strike_timer then self.strike_timer = 0 end
+                    if not self.strike_interval then self.strike_interval = 2.5 end
 
-                        if not self.strike_timer then self.strike_timer = 0 end
-                        if not self.strike_interval then self.strike_interval = 2.5 end
+                    self.strike_timer = self.strike_timer + dtime
 
-                        self.strike_timer = self.strike_timer + dtime
+                    if distance >= 4 and distance <= 20 and self.strike_timer >= self.strike_interval then
+                        if not self.assigned_strikes or #self.assigned_strikes == 0 then
+                            minetest.log("error", "[lualore] Valkyrie has no assigned strikes!")
+                            self.assigned_strikes = lualore.valkyrie_strikes.assign_random_strikes()
+                            self.current_strike = 1
+                        end
 
-                        if distance >= 4 and distance <= 20 and self.strike_timer >= self.strike_interval then
-                            if not self.assigned_strikes or #self.assigned_strikes == 0 then
-                                minetest.log("error", "[lualore] Valkyrie has no assigned strikes!")
-                                self.assigned_strikes = lualore.valkyrie_strikes.assign_random_strikes()
-                                self.current_strike = 1
-                            end
+                        local strike_func = self.assigned_strikes[self.current_strike]
+                        if strike_func and type(strike_func) == "function" then
+                            minetest.log("action", "[lualore] Attempting strike " .. self.current_strike .. " at distance " .. math.floor(distance))
 
-                            local strike_func = self.assigned_strikes[self.current_strike]
-                            if strike_func and type(strike_func) == "function" then
-                                minetest.log("action", "[lualore] Attempting strike " .. self.current_strike .. " at distance " .. math.floor(distance))
+                            local strike_id = lualore.valkyrie_strikes.get_strike_id(strike_func)
+                            local success = lualore.valkyrie_strikes.use_strike(self, strike_func, target)
 
-                                local strike_id = lualore.valkyrie_strikes.get_strike_id(strike_func)
-                                local success = lualore.valkyrie_strikes.use_strike(self, strike_func, target)
-
+                            if success then
+                                if strike_id then
+                                    lualore.valkyrie_strikes.spawn_npc_trail(self, target, strike_id)
+                                    lualore.valkyrie_strikes.spawn_player_trail(target, strike_id)
+                                end
+                                self.current_strike = self.current_strike % #self.assigned_strikes + 1
+                                minetest.chat_send_player(target:get_player_name(), S("Valkyrie unleashes a powerful strike!"))
+                                minetest.log("action", "[lualore] Valkyrie successfully used strike on " .. target:get_player_name())
+                                self.strike_timer = 0
+                            else
+                                minetest.log("warning", "[lualore] Strike " .. self.current_strike .. " failed - on cooldown or player has effect")
+                                self.current_strike = self.current_strike % #self.assigned_strikes + 1
+                                strike_func = self.assigned_strikes[self.current_strike]
+                                strike_id = lualore.valkyrie_strikes.get_strike_id(strike_func)
+                                success = lualore.valkyrie_strikes.use_strike(self, strike_func, target)
                                 if success then
                                     if strike_id then
                                         lualore.valkyrie_strikes.spawn_npc_trail(self, target, strike_id)
@@ -320,44 +339,28 @@ for _, valkyrie in ipairs(valkyrie_types) do
                                     end
                                     self.current_strike = self.current_strike % #self.assigned_strikes + 1
                                     minetest.chat_send_player(target:get_player_name(), S("Valkyrie unleashes a powerful strike!"))
-                                    minetest.log("action", "[lualore] Valkyrie successfully used strike on " .. target:get_player_name())
-                                    self.strike_timer = 0
+                                    minetest.log("action", "[lualore] Valkyrie fallback to strike " .. self.current_strike .. " on " .. target:get_player_name())
                                 else
-                                    minetest.log("warning", "[lualore] Strike " .. self.current_strike .. " failed - on cooldown or player has effect")
-                                    self.current_strike = self.current_strike % #self.assigned_strikes + 1
-                                    strike_func = self.assigned_strikes[self.current_strike]
-                                    strike_id = lualore.valkyrie_strikes.get_strike_id(strike_func)
-                                    success = lualore.valkyrie_strikes.use_strike(self, strike_func, target)
-                                    if success then
-                                        if strike_id then
-                                            lualore.valkyrie_strikes.spawn_npc_trail(self, target, strike_id)
-                                            lualore.valkyrie_strikes.spawn_player_trail(target, strike_id)
-                                        end
-                                        self.current_strike = self.current_strike % #self.assigned_strikes + 1
-                                        minetest.chat_send_player(target:get_player_name(), S("Valkyrie unleashes a powerful strike!"))
-                                        minetest.log("action", "[lualore] Valkyrie fallback to strike " .. self.current_strike .. " on " .. target:get_player_name())
-                                    else
-                                        minetest.log("warning", "[lualore] Fallback strike also failed")
-                                    end
-                                    self.strike_timer = 0
+                                    minetest.log("warning", "[lualore] Fallback strike also failed")
                                 end
-                            else
-                                minetest.log("error", "[lualore] Strike function is nil or not a function!")
+                                self.strike_timer = 0
                             end
-                        elseif distance < 4 then
-                            local dir = vector.direction(player_pos, self_pos)
-                            self.object:set_velocity(vector.multiply(dir, 2))
-                        elseif distance > 8 and distance <= 20 then
-                            local dir = vector.direction(self_pos, player_pos)
-                            dir.y = dir.y + 0.2
-                            local dash_vel = vector.multiply(dir, 5)
-                            self.object:set_velocity(dash_vel)
+                        else
+                            minetest.log("error", "[lualore] Strike function is nil or not a function!")
                         end
+                    elseif distance < 4 then
+                        local dir = vector.direction(player_pos, self_pos)
+                        self.object:set_velocity(vector.multiply(dir, 2))
+                    elseif distance > 8 and distance <= 20 then
+                        local dir = vector.direction(self_pos, player_pos)
+                        dir.y = dir.y + 0.2
+                        local dash_vel = vector.multiply(dir, 5)
+                        self.object:set_velocity(dash_vel)
                     end
                 end
 
                 -- Wing tip particles
-                if pos then
+                if pos and pos.x and pos.y and pos.z then
                     local wing_left = vector.add(pos, {x=-0.5, y=0.8, z=0})
                     local wing_right = vector.add(pos, {x=0.5, y=0.8, z=0})
 
