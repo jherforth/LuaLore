@@ -257,6 +257,18 @@ for _, valkyrie in ipairs(valkyrie_types) do
                             self.object:set_velocity({x=vel.x, y=vel.y * 0.7, z=vel.z})
                         end
                     end
+                else
+                    -- No target - descend to ground if airborne
+                    local below_pos = {x=pos.x, y=pos.y - 0.5, z=pos.z}
+                    local node_below = minetest.get_node(below_pos)
+
+                    -- Check if there's solid ground below
+                    if node_below.name == "air" or node_below.name == "ignore" then
+                        -- Still airborne, apply descent velocity
+                        if vel then
+                            self.object:set_velocity({x=vel.x * 0.8, y=-3, z=vel.z * 0.8})
+                        end
+                    end
                 end
 
                 if self.object.set_bone_position then
