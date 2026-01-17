@@ -80,6 +80,11 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
                 goto continue
             end
 
+            -- Skip beds at sky level (Y >= 400) - these are for sky folk, not regular villagers
+            if bed_pos.y >= 400 then
+                goto continue
+            end
+
             -- Check if this is part of a bed pair and mark both halves
             -- Most beds have _top and _bottom or two connected parts
             local bed_node = minetest.get_node(bed_pos)
