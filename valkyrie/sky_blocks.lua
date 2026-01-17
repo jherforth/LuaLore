@@ -53,7 +53,7 @@ local function attach_wings(parent_obj, wing_type)
             parent_obj,
             "",  -- Attach to root bone
             {x=0, y=10, z=-5},  -- Position: up a bit, back from body (tweak as needed)
-            {x=90, y=0, z=0}  -- Rotation: adjust to angle the sprite like wings (e.g., slight tilt)
+            {x=0, y=0, z=0}  -- Rotation: vertical wings when standing
         )
 
         wing_entity:get_luaentity().wing_type = wing_type
@@ -204,8 +204,8 @@ minetest.register_globalstep(function(dtime)
 						wing_data.was_flying = true
 					end
 
-					player:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=-90, y=0, z=180})
-					player:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=90, y=180, z=0})
+					player:set_bone_position("Body", {x=0, y=6.3, z=0}, {x=-90, y=0, z=0})
+					player:set_bone_position("Head", {x=0, y=6.3, z=0}, {x=90, y=0, z=0})
 
 					if ctrl.jump then
 						player:add_velocity({x=0, y=wing_info.lift_power, z=0})
