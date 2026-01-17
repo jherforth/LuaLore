@@ -57,10 +57,10 @@ local strike_1_wind_dash = function(self, player)
         glow = 8
     })
 
-    minetest.sound_play("magic", {
+    minetest.sound_play("strike1", {
         pos = player_pos,
-        gain = 0.5,
-        max_hear_distance = 16
+        gain = 0.6,
+        max_hear_distance = 20
     })
 
     return true
@@ -93,7 +93,7 @@ local strike_2_tempest_spin = function(self, player)
         glow = 10
     })
 
-    minetest.sound_play("magic", {pos = player_pos, gain = 0.5, max_hear_distance = 16})
+    minetest.sound_play("strike2", {pos = player_pos, gain = 0.6, max_hear_distance = 20})
     return true
 end
 
@@ -124,7 +124,7 @@ local strike_3_frost_bind = function(self, player)
         glow = 8
     })
 
-    minetest.sound_play("magic", {pos = player_pos, gain = 0.5, max_hear_distance = 16})
+    minetest.sound_play("strike3", {pos = player_pos, gain = 0.6, max_hear_distance = 20})
     return true
 end
 
@@ -155,7 +155,7 @@ local strike_4_sky_surge = function(self, player)
         glow = 12
     })
 
-    minetest.sound_play("magic", {pos = player_pos, gain = 0.5, max_hear_distance = 16})
+    minetest.sound_play("strike4", {pos = player_pos, gain = 0.6, max_hear_distance = 20})
     return true
 end
 
@@ -186,7 +186,7 @@ local strike_5_thunder_lift = function(self, player)
         glow = 14
     })
 
-    minetest.sound_play("magic", {pos = player_pos, gain = 0.5, max_hear_distance = 16})
+    minetest.sound_play("strike5", {pos = player_pos, gain = 0.6, max_hear_distance = 20})
     return true
 end
 
@@ -217,7 +217,7 @@ local strike_6_storm_compress = function(self, player)
         glow = 10
     })
 
-    minetest.sound_play("magic", {pos = player_pos, gain = 0.5, max_hear_distance = 16})
+    minetest.sound_play("strike6", {pos = player_pos, gain = 0.6, max_hear_distance = 20})
     return true
 end
 
@@ -248,7 +248,7 @@ local strike_7_shadow_veil = function(self, player)
         glow = 0
     })
 
-    minetest.sound_play("magic", {pos = player_pos, gain = 0.5, max_hear_distance = 16})
+    minetest.sound_play("strike7", {pos = player_pos, gain = 0.6, max_hear_distance = 20})
     return true
 end
 
@@ -312,8 +312,9 @@ function lualore.valkyrie_strikes.spawn_npc_trail(self, player, strike_id)
         glow = config.glow
     })
 
-    -- Optional whoosh sound at cast point
-    minetest.sound_play("magic", {pos = pos, gain = 0.4, max_hear_distance = 24})
+    -- Whoosh sound at cast point based on strike
+    local sound_name = "strike" .. strike_id
+    minetest.sound_play(sound_name, {pos = pos, gain = 0.35, pitch = 1.2, max_hear_distance = 24})
 end
 
 -- Burst trail exploding outward from player (when hit)

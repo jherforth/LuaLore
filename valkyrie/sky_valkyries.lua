@@ -288,9 +288,14 @@ for _, valkyrie in ipairs(valkyrie_types) do
                             if strike_func and type(strike_func) == "function" then
                                 minetest.log("action", "[lualore] Attempting strike " .. self.current_strike .. " at distance " .. math.floor(distance))
 
+                                local strike_id = lualore.valkyrie_strikes.get_strike_id(strike_func)
                                 local success = lualore.valkyrie_strikes.use_strike(self, strike_func, target)
 
                                 if success then
+                                    if strike_id then
+                                        lualore.valkyrie_strikes.spawn_npc_trail(self, target, strike_id)
+                                        lualore.valkyrie_strikes.spawn_player_trail(target, strike_id)
+                                    end
                                     self.current_strike = self.current_strike % #self.assigned_strikes + 1
                                     minetest.chat_send_player(target:get_player_name(), S("Valkyrie unleashes a powerful strike!"))
                                     minetest.log("action", "[lualore] Valkyrie successfully used strike on " .. target:get_player_name())
@@ -299,8 +304,13 @@ for _, valkyrie in ipairs(valkyrie_types) do
                                     minetest.log("warning", "[lualore] Strike " .. self.current_strike .. " failed - on cooldown or player has effect")
                                     self.current_strike = self.current_strike % #self.assigned_strikes + 1
                                     strike_func = self.assigned_strikes[self.current_strike]
+                                    strike_id = lualore.valkyrie_strikes.get_strike_id(strike_func)
                                     success = lualore.valkyrie_strikes.use_strike(self, strike_func, target)
                                     if success then
+                                        if strike_id then
+                                            lualore.valkyrie_strikes.spawn_npc_trail(self, target, strike_id)
+                                            lualore.valkyrie_strikes.spawn_player_trail(target, strike_id)
+                                        end
                                         self.current_strike = self.current_strike % #self.assigned_strikes + 1
                                         minetest.chat_send_player(target:get_player_name(), S("Valkyrie unleashes a powerful strike!"))
                                         minetest.log("action", "[lualore] Valkyrie fallback to strike " .. self.current_strike .. " on " .. target:get_player_name())
