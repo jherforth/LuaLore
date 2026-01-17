@@ -31,7 +31,7 @@ local function register_sky_fortress(params)
 		y_min = 500,
 		y_max = 31000,
 
-		place_offset_y = -6,
+		place_offset_y = -5,
 		flags = "place_center_x, place_center_z, force_placement, all_floors",
 
 		height = 0,
@@ -53,7 +53,7 @@ local function register_sky_house(params)
 		y_min = 500,
 		y_max = 31000,
 
-		place_offset_y = -6,
+		place_offset_y = -5,
 		flags = "place_center_x, place_center_z, force_placement, all_floors",
 
 		height = 0,
