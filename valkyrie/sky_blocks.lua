@@ -52,7 +52,12 @@ local function attach_wings(parent_obj, wing_type)
         wing_entity:set_attach(
             parent_obj,
             "",  -- Attach to root bone
-            {x=0, y=10, z=-5},  -- Position: up a bit, behind body (adjusted for 180 rotation)
+            {x=0, y=10, z=5},  -- Position: up a bit, behind body
+            -- ADJUSTMENT GUIDE:
+            -- - Increase z (e.g., 6, 7) to move wings further back
+            -- - Decrease z (e.g., 4, 3) to move wings closer to body
+            -- - Adjust y to move wings up/down (currently 10)
+            -- - Adjust x to move wings left/right (currently 0 = centered)
             {x=0, y=180, z=0}  -- Rotation: vertical wings aligned with player facing forward
         )
 
