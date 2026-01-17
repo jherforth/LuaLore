@@ -99,8 +99,15 @@ local function activate_wings(player, wing_type)
 		timer = 0,
 		flight_time = wing_data.flight_time,
 		wing_entity = wing_entity,
-		was_flying = false
+		was_flying = false,
+		original_physics = player:get_physics_override()
 	}
+
+	-- Enable flight physics
+	player:set_physics_override({
+		gravity = 0.3,  -- Reduced gravity for easier flight
+		speed = 1.2     -- Slightly faster movement
+	})
 
 	-- Set initial standing pose with wings (facing forward)
 	player:set_bone_override("Body", {position = {x=0, y=6.3, z=0}, rotation = {x=0, y=180, z=0}})
@@ -112,8 +119,21 @@ end
 local function deactivate_wings(player, player_name)
 	if not active_wings[player_name] then return end
 
+	local wing_data = active_wings[player_name]
+
 	if player and player:is_player() then
 		remove_wings(player)
+
+		-- Restore original physics
+		if wing_data.original_physics then
+			player:set_physics_override(wing_data.original_physics)
+		else
+			-- Fallback to default physics
+			player:set_physics_override({
+				gravity = 1,
+				speed = 1
+			})
+		end
 
 		-- Reset all bone overrides to default
 		player:set_bone_override("Body", {position = {x=0, y=6.3, z=0}, rotation = {x=0, y=0, z=0}})
@@ -203,6 +223,15 @@ minetest.register_globalstep(function(dtime)
 				local ctrl = player:get_player_control()
 				local player_pos = player:get_pos()
 
+				-- Always allow flight controls
+				if ctrl.jump then
+					player:add_velocity({x=0, y=wing_info.lift_power, z=0})
+				elseif ctrl.sneak then
+					if vel.y > -5 then
+						player:add_velocity({x=0, y=-0.8, z=0})
+					end
+				end
+
 				local is_moving = vel and (math.abs(vel.x) > 0.3 or math.abs(vel.z) > 0.3 or math.abs(vel.y) > 0.5)
 
 				if is_moving then
@@ -213,13 +242,7 @@ minetest.register_globalstep(function(dtime)
 					player:set_bone_override("Body", {position = {x=0, y=6.3, z=0}, rotation = {x=-90, y=180, z=0}})
 					player:set_bone_override("Head", {position = {x=0, y=6.3, z=0}, rotation = {x=90, y=180, z=0}})
 
-					if ctrl.jump then
-						player:add_velocity({x=0, y=wing_info.lift_power, z=0})
-					elseif ctrl.sneak then
-						if vel.y > -5 then
-							player:add_velocity({x=0, y=-0.5, z=0})
-						end
-					else
+					if not ctrl.jump and not ctrl.sneak then
 						if vel.y < -1 then
 							local drag = vector.multiply(vel, {x=0, y=0.3, z=0})
 							player:add_velocity(drag)
