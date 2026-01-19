@@ -329,6 +329,15 @@ local function register_villager(class_name, class_def, biome_name, biome_config
 						self.tamed = data.tamed or false
 						self.nametag = data.nametag or ""
 
+						-- Restore provoked state
+						if data.nv_provoked then
+							self.nv_provoked = data.nv_provoked
+							self.nv_provoker = data.nv_provoker
+							self.nv_original_type = data.nv_original_type
+							self.type = "monster"
+							self.passive = false
+						end
+
 						-- Restore mood data
 						if lualore.mood and data.mood then
 							lualore.mood.on_activate_extra(self, data.mood)
@@ -371,6 +380,9 @@ local function register_villager(class_name, class_def, biome_name, biome_config
 					owner = self.owner or "",
 					tamed = self.tamed or false,
 					nametag = self.nametag or "",
+					nv_provoked = self.nv_provoked or false,
+					nv_provoker = self.nv_provoker or "",
+					nv_original_type = self.nv_original_type or nil,
 				}
 
 				-- Add mood data if available
@@ -488,7 +500,69 @@ local function register_villager(class_name, class_def, biome_name, biome_config
 				end
 			end
 
-			-- If not a valid trade, do nothing (no damage)
+			-- DEFENSIVE BEHAVIOR: If this is an NPC being attacked (not a trade), fight back!
+			if self.type == "npc" and not self.nv_provoked then
+				-- Check if the player is actually attacking (wielding a weapon/tool with damage capabilities)
+				local is_attacking = false
+
+				if tool_capabilities then
+					local damage_groups = tool_capabilities.damage_groups
+					if damage_groups and (damage_groups.fleshy or damage_groups.snappy or damage_groups.cracky) then
+						is_attacking = true
+					end
+				end
+
+				-- If being attacked, become hostile
+				if is_attacking then
+					-- Store original type so we know this was an NPC
+					if not self.nv_original_type then
+						self.nv_original_type = self.type
+					end
+
+					-- Change to monster type and become hostile
+					self.type = "monster"
+					self.passive = false
+					self.nv_provoked = true
+					self.nv_provoker = player_name
+
+					-- Set the player as attack target
+					self.attack = hitter
+
+					-- Spawn angry particles
+					local pos = self.object:get_pos()
+					if pos then
+						minetest.add_particlespawner({
+							amount = 30,
+							time = 0.5,
+							minpos = {x = pos.x - 0.3, y = pos.y + 1.0, z = pos.z - 0.3},
+							maxpos = {x = pos.x + 0.3, y = pos.y + 1.8, z = pos.z + 0.3},
+							minvel = {x = -0.5, y = 0.5, z = -0.5},
+							maxvel = {x = 0.5, y = 1.5, z = 0.5},
+							minacc = {x = 0, y = 0, z = 0},
+							maxacc = {x = 0, y = 0, z = 0},
+							minexptime = 0.5,
+							maxexptime = 1.5,
+							minsize = 1.0,
+							maxsize = 2.0,
+							texture = "lualore_mood_angry.png",
+							glow = 10,
+						})
+					end
+
+					-- Update mood to angry
+					if lualore.mood then
+						self.nv_mood = "angry"
+						self.nv_mood_value = 10
+					end
+
+					minetest.chat_send_player(player_name, S("The villager fights back!"))
+
+					-- Allow default punch behavior to apply damage
+					return false
+				end
+			end
+
+			-- If not a valid trade and not an attack, do nothing (no damage)
 			return
 		end,
 
