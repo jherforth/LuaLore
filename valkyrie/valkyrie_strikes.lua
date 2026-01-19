@@ -30,13 +30,14 @@ function lualore.valkyrie_strikes.clear_all_player_effects(player)
 
     local player_name = player:get_player_name()
     if player_effects[player_name] then
-        if player_effects[player_name]["shadow_veil"] then
+        local has_shadow_or_storm = player_effects[player_name]["shadow_veil"] or player_effects[player_name]["storm_compress"]
+
+        if has_shadow_or_storm then
             player:override_day_night_ratio(nil)
         end
 
         if player_effects[player_name]["storm_compress"] then
             player:set_properties({visual_size = {x=1, y=1}})
-            player:override_day_night_ratio(nil)
         end
 
         player:set_physics_override({
@@ -45,7 +46,19 @@ function lualore.valkyrie_strikes.clear_all_player_effects(player)
             gravity = 1.0
         })
 
-        player_effects[player_name] = nil
+        player_effects[player_name] = {}
+
+        minetest.after(0.1, function()
+            if player and player:is_player() then
+                player:override_day_night_ratio(nil)
+                player:set_physics_override({
+                    speed = 1.0,
+                    jump = 1.0,
+                    gravity = 1.0
+                })
+            end
+        end)
+
         minetest.log("action", "[lualore] Cleared all valkyrie strike effects for " .. player_name)
     end
 end
