@@ -32,7 +32,7 @@ local function register_sky_fortress(params)
 		y_max = 31000,
 
 		place_offset_y = -5,
-		flags = "place_center_x, place_center_z, force_placement, all_floors",
+		flags = "place_center_x, place_center_z, force_placement",
 
 		height = 0,
 		height_max = 0,
@@ -54,7 +54,7 @@ local function register_sky_house(params)
 		y_max = 31000,
 
 		place_offset_y = -5,
-		flags = "place_center_x, place_center_z, force_placement, all_floors",
+		flags = "place_center_x, place_center_z, force_placement",
 
 		height = 0,
 		height_max = 0,
@@ -82,28 +82,42 @@ minetest.register_chatcommand("spawn_fortress_valkyries", {
 		end
 
 		local pos = player:get_pos()
+		local search_min = vector.subtract(pos, {x=50, y=25, z=50})
+		local search_max = vector.add(pos, {x=50, y=25, z=50})
+
+		local torch_positions = minetest.find_nodes_in_area(
+			search_min,
+			search_max,
+			{"everness:mineral_torch"}
+		)
+
+		if #torch_positions == 0 then
+			return false, S("No fortress torches found nearby. Stand closer to a sky fortress.")
+		end
 
 		local valkyrie_types_list = {"blue", "violet", "gold", "green"}
-		local num_valkyries = math.random(2, 5)
 		local spawned = 0
 
-		for i = 1, num_valkyries do
-			local random_offset = {
-				x = math.random(-15, 15),
-				y = math.random(5, 15),
-				z = math.random(-15, 15)
-			}
-			local spawn_pos = vector.add(pos, random_offset)
-			local chosen_type = valkyrie_types_list[math.random(1, #valkyrie_types_list)]
-			local mob_name = "lualore:" .. chosen_type .. "_valkyrie"
+		for i, torch_pos in ipairs(torch_positions) do
+			if spawned >= 5 then
+				break
+			end
 
-			local obj = minetest.add_entity(spawn_pos, mob_name)
-			if obj then
-				spawned = spawned + 1
+			local spawn_pos = {x = torch_pos.x, y = torch_pos.y + 1, z = torch_pos.z}
+			local node_at_spawn = minetest.get_node(spawn_pos)
+
+			if node_at_spawn.name == "air" then
+				local chosen_type = valkyrie_types_list[math.random(1, #valkyrie_types_list)]
+				local mob_name = "lualore:" .. chosen_type .. "_valkyrie"
+
+				local obj = minetest.add_entity(spawn_pos, mob_name)
+				if obj then
+					spawned = spawned + 1
+				end
 			end
 		end
 
-		return true, S("Spawned @1 Valkyries near your position", spawned)
+		return true, S("Spawned @1 Valkyries at fortress torch positions", spawned)
 	end
 })
 
@@ -163,29 +177,46 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 			end
 
 			if lualore.sky_valkyries then
-				local valkyrie_types_list = {"blue", "violet", "gold", "green"}
-				local num_valkyries = math.random(2, 5)
+				local search_min = vector.subtract(fortress_pos, {x=40, y=20, z=40})
+				local search_max = vector.add(fortress_pos, {x=40, y=20, z=40})
 
-				minetest.log("action", "[lualore] Spawning " .. num_valkyries .. " Valkyries at fortress")
+				local torch_positions = minetest.find_nodes_in_area(
+					search_min,
+					search_max,
+					{"everness:mineral_torch"}
+				)
 
-				for i = 1, num_valkyries do
-					local random_offset = {
-						x = math.random(-15, 15),
-						y = math.random(5, 15),
-						z = math.random(-15, 15)
-					}
-					local spawn_pos = vector.add(fortress_pos, random_offset)
-					local chosen_type = valkyrie_types_list[math.random(1, #valkyrie_types_list)]
-					local mob_name = "lualore:" .. chosen_type .. "_valkyrie"
+				if #torch_positions > 0 then
+					local valkyrie_types_list = {"blue", "violet", "gold", "green"}
+					local spawned_count = 0
 
-					local obj = minetest.add_entity(spawn_pos, mob_name)
-					if obj then
-						minetest.log("action", "[lualore] Spawned " .. chosen_type .. " Valkyrie at " ..
-							minetest.pos_to_string(spawn_pos))
-					else
-						minetest.log("error", "[lualore] Failed to spawn " .. chosen_type .. " Valkyrie at " ..
-							minetest.pos_to_string(spawn_pos))
+					minetest.log("action", "[lualore] Found " .. #torch_positions .. " torch positions for Valkyrie spawning")
+
+					for i, torch_pos in ipairs(torch_positions) do
+						if spawned_count >= 5 then
+							break
+						end
+
+						local spawn_pos = {x = torch_pos.x, y = torch_pos.y + 1, z = torch_pos.z}
+						local node_at_spawn = minetest.get_node(spawn_pos)
+
+						if node_at_spawn.name == "air" then
+							local chosen_type = valkyrie_types_list[math.random(1, #valkyrie_types_list)]
+							local mob_name = "lualore:" .. chosen_type .. "_valkyrie"
+
+							local obj = minetest.add_entity(spawn_pos, mob_name)
+							if obj then
+								spawned_count = spawned_count + 1
+								minetest.log("action", "[lualore] Spawned " .. chosen_type .. " Valkyrie at torch position " ..
+									minetest.pos_to_string(spawn_pos))
+							end
+						end
 					end
+
+					minetest.log("action", "[lualore] Successfully spawned " .. spawned_count .. " Valkyries at fortress")
+				else
+					minetest.log("warning", "[lualore] No torch positions found at fortress " ..
+						minetest.pos_to_string(fortress_pos))
 				end
 			end
 		end)
