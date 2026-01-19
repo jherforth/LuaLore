@@ -29,9 +29,9 @@ local function play_liberation_music(pos)
 		return false
 	end
 
-	minetest.sound_play("Skyforge Valkyrie", {
+	minetest.sound_play("SkyforgeValkyrie", {
 		pos = pos,
-		gain = 1.5,
+		gain = 1,
 		max_hear_distance = 100
 	})
 
