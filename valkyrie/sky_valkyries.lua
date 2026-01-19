@@ -144,6 +144,18 @@ for _, valkyrie in ipairs(valkyrie_types) do
             self.valkyrie_base_texture = valkyrie_texture
             self.valkyrie_wing_texture = valkyrie_wing_texture
 
+            if staticdata and staticdata ~= "" then
+                local data = minetest.deserialize(staticdata)
+                if data then
+                    if data.bed_pos then
+                        self.bed_pos = data.bed_pos
+                    end
+                    if data.patrol_radius then
+                        self.patrol_radius = data.patrol_radius
+                    end
+                end
+            end
+
             if not self.assigned_strikes then
                 self.assigned_strikes = lualore.valkyrie_strikes.assign_random_strikes()
                 minetest.log("action", "[lualore] Valkyrie assigned " .. #self.assigned_strikes .. " strikes")
@@ -170,6 +182,17 @@ for _, valkyrie in ipairs(valkyrie_types) do
                     self.object:set_velocity({x=0, y=2, z=0})
                 end
             end)
+        end,
+
+        get_staticdata = function(self)
+            local data = {}
+            if self.bed_pos then
+                data.bed_pos = self.bed_pos
+            end
+            if self.patrol_radius then
+                data.patrol_radius = self.patrol_radius
+            end
+            return minetest.serialize(data)
         end,
 
         -- Reliable cleanup: Find and remove attached wing entity on death
@@ -226,15 +249,30 @@ for _, valkyrie in ipairs(valkyrie_types) do
                 local pos = self.object:get_pos()
                 if not pos then return end
 
+                if self.bed_pos and self.patrol_radius then
+                    local distance_from_bed = vector.distance(pos, self.bed_pos)
+
+                    if distance_from_bed > self.patrol_radius then
+                        local direction = vector.direction(pos, self.bed_pos)
+                        local pull_back = vector.multiply(direction, 2)
+                        local vel = self.object:get_velocity()
+                        if vel then
+                            self.object:set_velocity(vector.add(vel, pull_back))
+                        end
+                    end
+                end
+
                 local target = self.attack
                 if not target or not target:is_player() then
                     for _, player in ipairs(minetest.get_connected_players()) do
                         local player_pos = player:get_pos()
                         if player_pos and pos and vector.distance(pos, player_pos) <= self.view_range then
-                            self.attack = player
-                            target = player
-                            minetest.log("action", "[lualore] Valkyrie acquired target: " .. player:get_player_name())
-                            break
+                            if not self.bed_pos or vector.distance(player_pos, self.bed_pos) <= (self.patrol_radius or 20) then
+                                self.attack = player
+                                target = player
+                                minetest.log("action", "[lualore] Valkyrie acquired target: " .. player:get_player_name())
+                                break
+                            end
                         end
                     end
                 end
@@ -488,6 +526,15 @@ minetest.register_chatcommand("valkyrie_info", {
                 minetest.chat_send_player(name, S("  Strikes: @1", strikes))
                 minetest.chat_send_player(name, S("  Current Strike: @1", current))
                 minetest.chat_send_player(name, S("  Timer: @1", math.floor(timer * 10) / 10))
+
+                if ent.bed_pos then
+                    local bed_distance = vector.distance(obj:get_pos(), ent.bed_pos)
+                    minetest.chat_send_player(name, S("  Bed: @1", minetest.pos_to_string(ent.bed_pos)))
+                    minetest.chat_send_player(name, S("  Distance from bed: @1", math.floor(bed_distance)))
+                    minetest.chat_send_player(name, S("  Patrol radius: @1", ent.patrol_radius or "N/A"))
+                else
+                    minetest.chat_send_player(name, S("  Bed: None (wandering)"))
+                end
             end
         end
 

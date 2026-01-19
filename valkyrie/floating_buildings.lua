@@ -123,11 +123,11 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 		z = math.random(minp.z, maxp.z)
 	}
 
-	local area_min = vector.subtract(check_pos, {x=25, y=10, z=25})
-	local area_max = vector.add(check_pos, {x=25, y=10, z=25})
+	local area_min = vector.subtract(check_pos, {x=30, y=15, z=30})
+	local area_max = vector.add(check_pos, {x=30, y=15, z=30})
 
-	local crystal_grass_count = 0
-	local crystal_grass_positions = {}
+	local bed_positions = {}
+	local castle_blocks_count = 0
 
 	for x = area_min.x, area_max.x do
 		for y = area_min.y, area_max.y do
@@ -135,22 +135,23 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 				local pos = {x=x, y=y, z=z}
 				local node = minetest.get_node_or_nil(pos)
 
-				if node and (node.name == "everness:dirt_with_crystal_grass" or
-				             node.name == "lualore:crystal_glass" or
-				             node.name == "lualore:skystone") then
-					crystal_grass_count = crystal_grass_count + 1
-					table.insert(crystal_grass_positions, pos)
+				if node then
+					if node.name == "beds:bed_bottom" then
+						table.insert(bed_positions, pos)
+					elseif node.name == "lualore:crystal_glass" or node.name == "lualore:skystone" then
+						castle_blocks_count = castle_blocks_count + 1
+					end
 				end
 			end
 		end
 	end
 
-	if crystal_grass_count >= 50 and #crystal_grass_positions > 0 then
-		local fortress_pos = crystal_grass_positions[1]
+	if #bed_positions > 0 and castle_blocks_count >= 30 then
+		local fortress_pos = bed_positions[1]
 		local fortress_hash = minetest.hash_node_position(fortress_pos)
 
-		minetest.log("action", "[lualore] Found fortress location at " .. minetest.pos_to_string(fortress_pos) ..
-			" with " .. crystal_grass_count .. " crystal grass blocks")
+		minetest.log("action", "[lualore] Found sky castle at " .. minetest.pos_to_string(fortress_pos) ..
+			" with " .. #bed_positions .. " beds and " .. castle_blocks_count .. " castle blocks")
 
 		minetest.after(3, function()
 			if lualore.sky_villages and lualore.sky_villages.spawn_sky_folk then
@@ -163,30 +164,34 @@ minetest.register_on_generated(function(minp, maxp, blockseed)
 			end
 
 			local valkyrie_types_list = {"blue", "violet", "gold", "green"}
-			local num_valkyries = math.random(3, 6)
+			local num_valkyries = math.min(#bed_positions, 4)
 
-			minetest.log("action", "[lualore] Spawning " .. num_valkyries .. " Valkyries at fortress " ..
-				minetest.pos_to_string(fortress_pos))
+			minetest.log("action", "[lualore] Spawning " .. num_valkyries .. " Valkyries at sky castle " ..
+				minetest.pos_to_string(fortress_pos) .. " (one per bed)")
 
 			for i = 1, num_valkyries do
-				local random_offset = {
-					x = math.random(-20, 20),
-					y = math.random(8, 25),
-					z = math.random(-20, 20)
-				}
-				local spawn_pos = vector.add(fortress_pos, random_offset)
+				local bed_pos = bed_positions[i]
+				local spawn_pos = vector.add(bed_pos, {
+					x = math.random(-8, 8),
+					y = math.random(10, 20),
+					z = math.random(-8, 8)
+				})
 				local chosen_type = valkyrie_types_list[math.random(1, #valkyrie_types_list)]
 				local mob_name = "lualore:" .. chosen_type .. "_valkyrie"
 
 				minetest.after(0.5 * i, function()
 					local obj = minetest.add_entity(spawn_pos, mob_name)
 					if obj then
-						minetest.log("action", "[lualore] Successfully spawned " .. chosen_type .. " Valkyrie at " ..
-							minetest.pos_to_string(spawn_pos))
+						local ent = obj:get_luaentity()
+						if ent then
+							ent.bed_pos = bed_pos
+							ent.patrol_radius = 15
+							minetest.log("action", "[lualore] Spawned " .. chosen_type .. " Valkyrie linked to bed at " ..
+								minetest.pos_to_string(bed_pos))
+						end
 						minetest.chat_send_all("[Lualore] A " .. chosen_type .. " Valkyrie has appeared in the sky!")
 					else
-						minetest.log("error", "[lualore] Failed to spawn " .. chosen_type .. " Valkyrie at " ..
-							minetest.pos_to_string(spawn_pos))
+						minetest.log("error", "[lualore] Failed to spawn Valkyrie at " .. minetest.pos_to_string(spawn_pos))
 					end
 				end)
 			end
