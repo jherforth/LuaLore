@@ -4,7 +4,7 @@ lualore.floating_buildings = {}
 
 local sky_fortress_noise = {
 	offset = 0,
-	scale = 0.001,
+	scale = 0.0017,
 	spread = {x = 600, y = 600, z = 600},
 	seed = 98534,
 	octaves = 3,
@@ -25,7 +25,7 @@ local function register_sky_fortress(params)
 		name = "lualore:" .. params.name,
 		deco_type = "schematic",
 		place_on = {"everness:dirt_with_crystal_grass"},
-		sidelen = 80,
+		sidelen = 100,
 		noise_params = sky_fortress_noise,
 		biomes = {"everness_crystal_forest"},
 		y_min = 500,
