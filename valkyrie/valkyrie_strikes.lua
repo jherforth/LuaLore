@@ -25,6 +25,31 @@ local function has_effect(player_name, effect_type)
     return player_effects[player_name] and player_effects[player_name][effect_type]
 end
 
+function lualore.valkyrie_strikes.clear_all_player_effects(player)
+    if not player or not player:is_player() then return end
+
+    local player_name = player:get_player_name()
+    if player_effects[player_name] then
+        if player_effects[player_name]["shadow_veil"] then
+            player:override_day_night_ratio(nil)
+        end
+
+        if player_effects[player_name]["storm_compress"] then
+            player:set_properties({visual_size = {x=1, y=1}})
+            player:override_day_night_ratio(nil)
+        end
+
+        player:set_physics_override({
+            speed = 1.0,
+            jump = 1.0,
+            gravity = 1.0
+        })
+
+        player_effects[player_name] = nil
+        minetest.log("action", "[lualore] Cleared all valkyrie strike effects for " .. player_name)
+    end
+end
+
 -- Strike functions (unchanged except for return true/false)
 local strike_1_wind_dash = function(self, player)
     if not player or not player:is_player() then return false end

@@ -25,18 +25,23 @@ end
 
 local function play_liberation_music(pos)
 	if not can_play_music() then
-		minetest.log("action", "[lualore] Liberation music on cooldown")
+		minetest.log("action", "[lualore] Liberation music on cooldown, skipping")
+		minetest.sound_play("SkyforgeValkyrie", {
+			pos = pos,
+			gain = 0.5,
+			max_hear_distance = 80
+		})
 		return false
 	end
 
 	minetest.sound_play("SkyforgeValkyrie", {
 		pos = pos,
-		gain = 1,
+		gain = 1.0,
 		max_hear_distance = 100
 	})
 
 	set_last_music_time(os.time())
-	minetest.log("action", "[lualore] Playing liberation music")
+	minetest.log("action", "[lualore] Playing liberation music at full volume")
 	return true
 end
 
@@ -91,12 +96,20 @@ local function free_sky_folk(sky_folk_entity)
 	sky_folk_entity.attack = nil
 	sky_folk_entity.liberated = true
 
-	local props = sky_folk_entity.object:get_properties()
-	props.textures = {"sky_folk_freed.png"}
-	sky_folk_entity.object:set_properties(props)
-
 	sky_folk_entity.base_texture = {"sky_folk_freed.png"}
 	sky_folk_entity.textures = {"sky_folk_freed.png"}
+
+	sky_folk_entity.object:set_properties({
+		textures = {"sky_folk_freed.png"}
+	})
+
+	minetest.after(0.1, function()
+		if sky_folk_entity and sky_folk_entity.object then
+			sky_folk_entity.object:set_properties({
+				textures = {"sky_folk_freed.png"}
+			})
+		end
+	end)
 
 	local pos = sky_folk_entity.object:get_pos()
 	if pos then
@@ -130,7 +143,7 @@ function lualore.sky_liberation.check_and_liberate(death_pos)
 	if not valkyries_found and #sky_folk_to_free > 0 then
 		minetest.log("action", "[lualore] All valkyries defeated! Liberating " .. #sky_folk_to_free .. " Sky Folk")
 
-		local music_played = play_liberation_music(death_pos)
+		play_liberation_music(death_pos)
 
 		for _, sky_folk in ipairs(sky_folk_to_free) do
 			free_sky_folk(sky_folk)
@@ -140,13 +153,8 @@ function lualore.sky_liberation.check_and_liberate(death_pos)
 		for _, player in ipairs(players) do
 			local player_pos = player:get_pos()
 			if player_pos and vector.distance(player_pos, death_pos) <= search_radius then
-				if music_played then
-					minetest.chat_send_player(player:get_player_name(),
-						S("The Valkyries have been defeated! The Sky Folk are free!"))
-				else
-					minetest.chat_send_player(player:get_player_name(),
-						S("The Sky Folk are free!"))
-				end
+				minetest.chat_send_player(player:get_player_name(),
+					S("The Valkyries have been defeated! The Sky Folk are free!"))
 			end
 		end
 
@@ -172,12 +180,20 @@ function lualore.sky_liberation.deserialize_sky_folk_data(self, data)
 		self.attack_players = false
 		self.attack = nil
 
-		local props = self.object:get_properties()
-		props.textures = {"sky_folk_freed.png"}
-		self.object:set_properties(props)
-
 		self.base_texture = {"sky_folk_freed.png"}
 		self.textures = {"sky_folk_freed.png"}
+
+		self.object:set_properties({
+			textures = {"sky_folk_freed.png"}
+		})
+
+		minetest.after(0.1, function()
+			if self and self.object then
+				self.object:set_properties({
+					textures = {"sky_folk_freed.png"}
+				})
+			end
+		end)
 
 		minetest.log("action", "[lualore] Sky Folk restored as liberated")
 	end

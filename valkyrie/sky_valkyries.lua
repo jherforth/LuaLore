@@ -200,6 +200,17 @@ for _, valkyrie in ipairs(valkyrie_types) do
                 end
             end
 
+            -- Clear all valkyrie strike effects from nearby players
+            if lualore.valkyrie_strikes and lualore.valkyrie_strikes.clear_all_player_effects then
+                local players = minetest.get_objects_inside_radius(pos, 50)
+                for _, obj in ipairs(players) do
+                    if obj:is_player() then
+                        lualore.valkyrie_strikes.clear_all_player_effects(obj)
+                    end
+                end
+                minetest.log("action", "[lualore] Cleared valkyrie strike effects from nearby players on valkyrie death")
+            end
+
             -- Check if all valkyries are defeated and liberate sky folk
             if lualore.sky_liberation then
                 minetest.after(0.5, function()
