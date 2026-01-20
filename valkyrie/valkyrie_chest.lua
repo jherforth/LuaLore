@@ -5,10 +5,10 @@ minetest.register_node("lualore:valkyrie_chest", {
 	tiles = {
 		"lualore_chest_top.png",
 		"lualore_chest_top.png",
+		"lualore_chest_front.png",
+		"lualore_chest_front.png",
 		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_front.png"
+		"lualore_chest_side.png"
 	},
 	drawtype = "mesh",
 	mesh = "chest.b3d",
@@ -102,12 +102,12 @@ minetest.register_node("lualore:valkyrie_chest", {
 minetest.register_node("lualore:valkyrie_chest_opened", {
 	description = S("Opened Valkyrie Chest"),
 	tiles = {
-		"lualore_chest_inside.png",
 		"lualore_chest_top.png",
+		"lualore_chest_top.png",
+		"lualore_chest_front.png",
+		"lualore_chest_front.png",
 		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_front.png"
+		"lualore_chest_inside.png"
 	},
 	drawtype = "mesh",
 	mesh = "chest_open.b3d",
