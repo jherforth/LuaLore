@@ -104,7 +104,7 @@ minetest.register_node("lualore:valkyrie_chest_opened", {
 		"lualore_chest_side.png"
 	},
 	drawtype = "mesh",
-	mesh = "everness_chest_open.obj",
+	mesh = "everness_chest_opened.obj",
 	paramtype = "light",
 	paramtype2 = "facedir",
 	groups = {cracky = 2, oddly_breakable_by_hand = 2, not_in_creative_inventory = 1},
