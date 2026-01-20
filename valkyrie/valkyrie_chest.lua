@@ -5,13 +5,13 @@ minetest.register_node("lualore:valkyrie_chest", {
 	tiles = {
 		"lualore_chest_top.png",
 		"lualore_chest_top.png",
-		"lualore_chest_front.png",
-		"lualore_chest_front.png",
 		"lualore_chest_side.png",
-		"lualore_chest_side.png"
+		"lualore_chest_side.png",
+		"lualore_chest_side.png",
+		"lualore_chest_front.png"
 	},
 	drawtype = "mesh",
-	mesh = "chest.b3d",
+	mesh = "everness_chest_closed.obj",
 	paramtype = "light",
 	paramtype2 = "facedir",
 	groups = {cracky = 2, oddly_breakable_by_hand = 2},
@@ -102,15 +102,15 @@ minetest.register_node("lualore:valkyrie_chest", {
 minetest.register_node("lualore:valkyrie_chest_opened", {
 	description = S("Opened Valkyrie Chest"),
 	tiles = {
+		"lualore_chest_inside.png",
 		"lualore_chest_top.png",
-		"lualore_chest_top.png",
-		"lualore_chest_front.png",
-		"lualore_chest_front.png",
 		"lualore_chest_side.png",
-		"lualore_chest_inside.png"
+		"lualore_chest_side.png",
+		"lualore_chest_side.png",
+		"lualore_chest_front.png"
 	},
 	drawtype = "mesh",
-	mesh = "chest_open.b3d",
+	mesh = "everness_chest_open.obj",
 	paramtype = "light",
 	paramtype2 = "facedir",
 	groups = {cracky = 2, oddly_breakable_by_hand = 2, not_in_creative_inventory = 1},
