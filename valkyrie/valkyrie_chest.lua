@@ -3,12 +3,9 @@ local S = minetest.get_translator("lualore")
 minetest.register_node("lualore:valkyrie_chest", {
 	description = S("Valkyrie Chest"),
 	tiles = {
+		"lualore_chest_front.png",
 		"lualore_chest_top.png",
-		"lualore_chest_top.png",
-		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_front.png"
+		"lualore_chest_side.png"
 	},
 	drawtype = "mesh",
 	mesh = "everness_chest_closed.obj",
@@ -102,12 +99,9 @@ minetest.register_node("lualore:valkyrie_chest", {
 minetest.register_node("lualore:valkyrie_chest_opened", {
 	description = S("Opened Valkyrie Chest"),
 	tiles = {
-		"lualore_chest_inside.png",
+		"lualore_chest_front.png",
 		"lualore_chest_top.png",
-		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_side.png",
-		"lualore_chest_front.png"
+		"lualore_chest_side.png"
 	},
 	drawtype = "mesh",
 	mesh = "everness_chest_open.obj",
